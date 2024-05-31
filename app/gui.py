@@ -1,14 +1,3 @@
-# pymem docs: https://pymem.readthedocs.io/en/stable/api_pymem_memory.html
-# int = 4 bytes
-# uint = unsigned int
-# short = 2 bytes
-# ushort = unsigned short
-# float = float 4 bytes
-
-# game notes:
-# player: ff7remake_.exe+579D6E8
-# data: ff7remake_.exe+57F75B8
-
 import keyboard # for hotkeys
 from pymem import *
 from pymem.process import *
