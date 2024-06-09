@@ -1,9 +1,9 @@
 """ Main app module, contains GUI and logic. """
 
-import keyboard # for hotkeys
+import functools
+import keyboard
 import logging, sys
 from datetime import datetime, timedelta #for timed_cache wrapper
-import functools
 from pymem import *
 from pymem.process import *
 from tkinter import *
@@ -102,7 +102,7 @@ def temp_highlight(labels: list, new_color=settings.Appearance.ACTIVE, normal_co
             label.config(fg=normal_color)
 
     # Launch highlight() as a thread
-    hl_thread = Thread(target = highlight).start()
+    hl_thread = Thread(target = highlight, daemon = True).start()
 
 # Highlight cheat label background for a few seconds. (starts a thread to avoid blocking)
 def temp_highlight_bg(labels: list, new_color=settings.Appearance.ACTIVE, normal_color=settings.Appearance.BG):
@@ -117,7 +117,7 @@ def temp_highlight_bg(labels: list, new_color=settings.Appearance.ACTIVE, normal
             label.config(bg=normal_color)
 
     # Launch highlight() as a thread
-    hl_thread = Thread(target = highlight).start()
+    hl_thread = Thread(target = highlight, daemon = True).start()
 
 # Same as above, with arbitrary widget property. Test some partial functions using this as base:
 def temporarily_highlight_widget(labels: list, label_property, new_color: str = settings.Appearance.ACTIVE, normal_color: str = settings.Appearance.FG) -> None:
@@ -878,7 +878,7 @@ class ModMenu():
 
         # Image 
         if settings.Appearance.SHOW_IMAGE:
-            self.image = PhotoImage(file="./ff7r.png")
+            self.image = PhotoImage(file="ff7r.png")
             self.image_label = Label(image=self.image, background=settings.Appearance.BG, height=140)
             self.image_label.grid(column=0, row=3, sticky='news', columnspan=2)
 
@@ -1005,7 +1005,7 @@ class ModMenu():
             fg=settings.Appearance.DIM, 
             font=(settings.FONTS['TEXT'], int(settings.FONTS['FONT_SIZE'])), 
             justify='right',
-        ).grid(column=0, row=63)
+        ).grid(column=0, row=63, sticky='w')
 
 
         self.item_options = Offsets.item_offsets #Note: Configure item_offsets{} dict in offsets.py
@@ -1038,6 +1038,8 @@ class ModMenu():
             border=0, 
             bd=0,
         )
+        if settings.Appearance.TRANSPARENT_BG:
+            self.item_menu['menu'].config(bg=settings.Appearance.BLACK)
         self.item_menu['menu']['relief'] = 'solid' #flat, groove, raised, ridge, solid, or sunken
         #self.item_menu.config(width = len(max(self.item_options, key=len))) # Width of longest item
         self.item_menu.grid(column=1, row=63, sticky='wens')
@@ -1206,8 +1208,8 @@ sonon = PartyMember('Sonon',
     },
 )
 
-# Mainloop
-if __name__ == '__main__':
+def main():
+    '''Main.'''
 
     ### SET HOTKEYS
     # Cloud
@@ -1235,3 +1237,7 @@ if __name__ == '__main__':
 
     # Exit 0 after quitting from GUI
     sys.exit(0)
+
+# Mainloop
+if __name__ == '__main__':
+    main()
