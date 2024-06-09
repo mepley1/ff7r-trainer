@@ -1,66 +1,72 @@
-# Colors
-BG = '#000C10'
-FG = '#FFFFFF'
-#ACTIVE = '#A9ff4E'
-#ACTIVE = '#53B9FF'
-ACTIVE = '#EB4B98' #magenta
-DIM = '#888888'
-#BLUE = '#3399FF'
-BLUE = '#53B9FF'
-DARKBLUE = '#000C10'
+""" Hotkeys and trainer config are defined in this file. """
 
-# Use 123 = Cloud, 456=aerith, 789=barret, etc
-# OR maybe 1= godmode all, 2= inf mp all, 3 = inf atb all, etc
+### GAME VERSION ###
+# Set as either 'epic' or 'steam'.
+# Memory addresses are defined based on which game version.
+# Only tested on Epic version; may or may not work well on Steam version.
+GAME_VERSION = 'epic'
 
-# Use tuples to feed it scan codes, or 'ctrl + num 1' as a string
+### APPEARANCE OPTIONS ###
+class Appearance:
+    TRANSPARENT_BG = False
+    SHOW_IMAGE = True
 
-# HOTKEYS
-HOTKEY_OPEN = 'Ctrl + Shift + F5'
+    # Colors
+    BG = '#000813'
+    BG_ENTRY = '#273A53'
+    FG = '#FFFFFF'
+    BLUE = '#53B9FF'
+    BLACK = '#000000'
+    ACTIVE = '#EB4B98'
+    DIM = '#909090'
+    ERROR = '#B02020'
 
-HOTKEY_CLOUD_GODMODE = 'Ctrl + Num 1' #ctrl + numpad 1
-HOTKEY_CLOUD_INF_MP = 'Ctrl + Num 2' #ctrl num2
-HOTKEY_CLOUD_INF_ATB = 'Ctrl + Num 3' #ctrl + num3
-HOTKEY_CLOUD_ATK_BOOST = 'Ctrl + Shift + Minus'
+    if TRANSPARENT_BG == True:
+        # If transparent background set, then use black bg for all buttons/entries
+        # to be less distracting when overlaying game window.
+        BG_ENTRY = '#000000'
 
-HOTKEY_AERITH_GODMODE = 'Ctrl + Num 4'
-HOTKEY_AERITH_INF_MP = 'Ctrl + Num 5'
-HOTKEY_AERITH_INF_ATB = 'Ctrl + Num 6'
+    # Extras / Not currently used
+    #BG_LIGHT = '#00193D'
+    #GREEN = '#A9ff4E' # Bright green
+    #MAGENTA_LIGHT = '#FF66B0' # Lighter magenta
 
-HOTKEY_ALL_CHARS_GODMODE = 'Ctrl + Shift + Num 1'
-HOTKEY_ALL_CHARS_INF_MP = 'Ctrl + Shift + Num 2'
-HOTKEY_ALL_CHARS_INF_ATB = 'Ctrl + Shift + Num 3'
+### HOTKEYS ###
+# Used by `keyboard` module to set hotkeys, and also displayed on GUI window.
+# To edit, use any format readable by `keyboard` module; 
+# Strings like below are preferable since these are shown as-is on the trainer.
+# but can also use a tuple of scan codes i.e. (29,42,78) for ctrl+shift+plus.
+# To find scan codes: run `python -m keyboard` in a terminal, then press keys.
+HOTKEYS = {
+    'HIDE_WINDOW': 'Ctrl + Shift + F12',
+    'EXIT': 'Ctrl + Shift + Del',
 
-#HOTKEY_ADD_GIL = (29,42,78) # ctrl + shift + plus
-HOTKEY_ADD_GIL = 'Ctrl + Shift + Plus'
+    # Cheat hotkeys
+    'CLOUD_GODMODE': 'Ctrl + Num 1',
+    'CLOUD_INF_MP': 'Ctrl + Num 2',
+    'CLOUD_INF_ATB': 'Ctrl + Num 3',
+    'CLOUD_ATK_BOOST': 'Ctrl + Shift + Num /',
 
-# Fonts
+    'AERITH_GODMODE': 'Ctrl + Num 4',
+    'AERITH_INF_MP': 'Ctrl + Num 5',
+    'AERITH_INF_ATB': 'Ctrl + Num 6',
 
-FONTNAME = 'Play'
-FONTNAME_TITLE = 'Impact'
-FONTNAME_SPECIAL = 'Play'
+    'ALL_CHARS_GODMODE': 'Ctrl + Shift + Num 1',
+    'ALL_CHARS_INF_MP': 'Ctrl + Shift + Num 2',
+    'ALL_CHARS_INF_ATB': 'Ctrl + Shift + Num 3',
+    'ALL_CHARS_INF_LIMIT': 'Ctrl + Shift + Num 4',
 
-FONT_SIZE = '9'
-FONT_SIZE_TITLE = '12'
+    # For 'add item' widget
+    'ADD_ITEM': 'Ctrl + Shift + Plus',
+}
 
-'''
-numpad scan codes:
-ctrl: 29
-left shift: 42
-right shift: 54
-0: 82
-1: 79
-2: 80
-3: 81
-4: 75
-5: 76
-6: 77
-7: 71
-8: 72
-9: 73
-+: 78
--: 74
-*: 55
-/ :53 (same as regular / key)
+### FONTS ###
+# Others won't have these fonts installed, so I'm keeping them configurable.
+FONTS = {
+    'TEXT': 'Play',
+    'TITLE': 'Impact',
+    'SPECIAL': 'Play',
 
-To find others, run python -m keyboard, then press keys.
-'''
+    'FONT_SIZE': '9',
+    'FONT_SIZE_TITLE': '12',
+}
