@@ -6,6 +6,7 @@ import logging, sys
 from datetime import datetime, timedelta #for timed_cache wrapper
 from pymem import *
 from pymem.process import *
+from pymem.ptypes import RemotePointer
 from tkinter import *
 from threading import Thread, Event
 from time import sleep
@@ -70,18 +71,22 @@ elif GAME_VERSION == 'steam':
     player_base = game_module + 0x57A57E8
     data_base = game_module + 0x57F75B8
 
-base_3 = game_module + 0x0579DAE8 #'Somewhat' interchangeable with player_base; see notes on converting pointers.
+#base_3 = game_module + 0x0579DAE8 #'Somewhat' interchangeable with player_base; see notes on converting pointers.
 
 ### Helper functions
 
-# Get pointer address
-def getPtrAddr(address: int, offsets: List[int]) -> int:
-    addr = mem.read_int(address)
+def getPtrAddr(base: int, offsets: List[int]) -> int:
+    ''' Get pointer address. This version works with ASLR enabled in OS. 
+    Args: 
+        <base>: Base address.
+        <offsets>: List of offsets.
+    '''
+    remote_pointer = RemotePointer(mem.process_handle, base)
     for offset in offsets:
         if offset != offsets[-1]:
-            addr = mem.read_int(addr + offset)
-    addr = addr + offsets[-1]
-    return addr
+            remote_pointer = RemotePointer(mem.process_handle, remote_pointer.value + offset)
+        else:
+            return remote_pointer.value + offset
 
 # Read a value (uint)
 # Un-used - for testing
