@@ -8,6 +8,7 @@ from pymem import *
 from pymem.process import *
 from pymem.ptypes import RemotePointer
 from tkinter import *
+from tkinter import messagebox
 from threading import Thread, Event
 from time import sleep
 from typing import List
@@ -96,7 +97,7 @@ def read_uint(base, offsets: List[int]) -> int:
 
 # Highlight cheat label for a few seconds. (starts a thread to avoid blocking)
 def temp_highlight(labels: list, new_color=settings.Appearance.ACTIVE, normal_color=settings.Appearance.FG):
-    """ Temporarily highlight foreground color of a widget.
+    """ Temporarily highlight foreground color of a widget, then return to previous color.
     Call when executing one-off cheats to indicate cheat usage """
 
     def highlight():
@@ -125,7 +126,7 @@ def temp_highlight_bg(labels: list, new_color=settings.Appearance.ACTIVE, normal
     hl_thread = Thread(target = highlight, daemon = True).start()
 
 # Same as above, with arbitrary widget property. Test some partial functions using this as base:
-def temporarily_highlight_widget(labels: list, label_property, new_color: str = settings.Appearance.ACTIVE, normal_color: str = settings.Appearance.FG) -> None:
+def temp_change_property(labels: list, label_property, new_color: str = settings.Appearance.ACTIVE, normal_color: str = settings.Appearance.FG) -> None:
     """ Temporarily change a property of a widget.
     Call when executing one-off cheats, to indicate cheat usage. """
 
@@ -139,7 +140,7 @@ def temporarily_highlight_widget(labels: list, label_property, new_color: str = 
             label[label_property] = normal_color
 
     # Launch highlight() as a thread
-    hl_thread = Thread(target = highlight).start()
+    hl_thread = Thread(target = highlight, daemon = True).start()
 
 # Update cheat label's text color (permanent).
 # un-used / testing
@@ -217,6 +218,12 @@ class Player():
     def hard_mode_ap_multiplier(self) -> int:
         '''Hard mode AP multiplier. (Getter)'''
         _ = mem.read_uint(getPtrAddr(data_base, self.offsets['hard_mode_ap_multiplier']))
+        return _
+
+    @property
+    def play_time(self) -> int:
+        '''Play time. (Getter)'''
+        _ = mem.read_uint(getPtrAddr(player_base, self.offsets['play_time']))
         return _
 
     # Controlled character getter (1 byte. offset from player_base)
@@ -539,7 +546,7 @@ class PartyMember():
     def atb_slots(self) -> int:
         '''Number of ATB bars.'''
         _ = mem.read_bytes(getPtrAddr(player_base, self.offsets['atb_slots']), 1)
-        _ = int.from_bytes(x, 'big')
+        _ = int.from_bytes(_, 'big')
         return _
 
     # Limit break getter
@@ -616,9 +623,17 @@ class PartyMember():
     def current_atb(self, _target_atb) -> None:
         mem.write_float(getPtrAddr(player_base, self.offsets['atb']), _target_atb)
 
+    # ATB Slots setter
+    @atb_slots.setter
+    def atb_slots(self, _target) -> None:
+        ''' Buggy. Still working on this. '''
+        _target = _target.to_bytes(1, 'big')
+        mem.write_bytes(getPtrAddr(player_base, self.offsets['atb_slots']), value=_target, length=1)
+
     # Limit setter
     @current_limit.setter
     def current_limit(self, _target_value) -> None:
+        ''' Limit break bar (setter). '''
         mem.write_float(getPtrAddr(player_base, self.offsets['limit']), _target_value)
 
     # Physical ATK setter
@@ -836,7 +851,7 @@ class PartyMember():
 
 ### GUI
 
-class ModMenu():
+class CheatTrainer():
     def __init__(self, window_title):
 
         self.is_hidden = False #For window hiding
@@ -1070,14 +1085,29 @@ class ModMenu():
         ### End "add items" menu ###
 
         # Spacer
-        self.spacer04 = Label(self.win).grid(column=0, row=70, columnspan=2)
+        self.spacer04 = Label(self.win)
+        self.spacer04.grid(column=0, row=70, columnspan=2)
+
+        # Show trainer info
+        self.help_label = Label(self.win, text=settings.HOTKEYS['SHOW_TRAINER_INFO'], foreground=settings.Appearance.DIM)
+        self.help_label.grid(column=0, row=90, sticky='wns')
+
+        self.help_effect_label = Label(self.win, text="Help", foreground=settings.Appearance.DIM)
+        self.help_effect_label.grid(column=1, row=90, sticky='wns')
+
+        # Show party info
+        self.party_info_label = Label(self.win, text=settings.HOTKEYS['SHOW_PARTY_INFO'], foreground=settings.Appearance.DIM)
+        self.party_info_label.grid(column=0, row=91, sticky='wns')
+
+        self.party_info_effect_label = Label(self.win, text="Party/game info", foreground=settings.Appearance.DIM)
+        self.party_info_effect_label.grid(column=1, row=91, sticky='wns')
 
         # Toggle window display
         self.open_label = Label(self.win, text=settings.HOTKEYS['HIDE_WINDOW'], foreground=settings.Appearance.DIM)
-        self.open_label.grid(column=0, row=90, sticky='wns')
+        self.open_label.grid(column=0, row=92, sticky='wns')
 
         self.open_effect_label = Label(self.win, text="Show/hide window", foreground=settings.Appearance.DIM)
-        self.open_effect_label.grid(column=1, row=90, sticky='wns')
+        self.open_effect_label.grid(column=1, row=92, sticky='wns')
 
         # Spacer
         self.spacer05 = Label(self.win).grid(column=0, row=100, columnspan=2)
@@ -1094,17 +1124,15 @@ class ModMenu():
             self.exit_btn_border, 
             text=f"Exit ({settings.HOTKEYS['EXIT']})", 
             command=self.win.destroy, 
-            bd=0
+            bd=0,
         )
         if settings.Appearance.TRANSPARENT_BG:
+            # If transparent_bg configured, then use black exit_btn + border frame.
             self.exit_btn.config(bg=settings.Appearance.BLACK)
             self.exit_btn_border.config(background=settings.Appearance.BLACK)
+
         self.exit_btn_border.grid(column=0, row=120, sticky='wens', columnspan=2)
         self.exit_btn.pack(expand=True, fill='both', padx=1, pady=1)
-
-    def change_label_color(self, label, color):
-        ''' Change color of label text, to hint active/inactive. '''
-        label.config(foreground=color)
 
     def get_item_selection(self):
         ''' Callback method for "add items" menu submit. '''
@@ -1112,7 +1140,7 @@ class ModMenu():
 
         # Avoid exception if 'category title' items is selected.
         if _item_name.startswith('--'):
-            logging.error('No item selected!')
+            self.log_error('No item selected!')
             temp_highlight_bg([self.item_menu], settings.Appearance.ERROR, settings.Appearance.BG_ENTRY)
             return None
 
@@ -1120,7 +1148,7 @@ class ModMenu():
         try:
             _offsets = self.item_options[_item_name]
         except (KeyError):
-            logging.error('No item selected!')
+            self.log_error('No item selected!')
             temp_highlight_bg([self.item_menu], settings.Appearance.ERROR, settings.Appearance.BG_ENTRY)
             return None
 
@@ -1128,7 +1156,7 @@ class ModMenu():
         try:
             _qty = int(self.qty_var.get())
         except ValueError:
-            logging.error('Invalid Quantity!')
+            self.log_error('Invalid quantity!')
             temp_highlight_bg([self.qty_entry,], settings.Appearance.ERROR, settings.Appearance.BG_ENTRY)
             return None
 
@@ -1144,7 +1172,58 @@ class ModMenu():
             self.is_hidden = True
             self.win.withdraw()
 
-modmenu = ModMenu("FF7 Remake Trainer")
+    def log_error(self, _msg: str = 'Invalid input'):
+        ''' Display an error messagebox, and log same message to log handler. 
+            Starts a thread to prevent messagebox from blocking highlight methods etc. '''
+        logging.error(_msg)
+        temp_change_property([modmenu.spacer04], 'text', _msg, '')
+
+    def display_party_info(self):
+        ''' Display current party member stats in a messagebox. '''
+        _msg = 'Current party:\n\n'
+
+        # Append each active party member's stats to _msg.
+        for _ in PartyMember.current_party():
+            _msg += (
+                f'{_.char_name}\n'
+                f'HP: {_.current_hp}/{_.max_hp}\n'
+                f'MP: {_.current_mp}/{_.max_mp}\n'
+                f'ATB: {_.current_atb} / Slots: {_.atb_slots}\n'
+                f'Limit: {_.current_limit}\n'
+                '\n'
+            )
+
+        _msg += (
+            f'Controlled char: {you.controlled_character}\n'
+            f'Play time: {you.play_time}\n'
+            f'Hard mode: {you.hard_mode}\n'
+            f'ATB per slot: {you.atb_per_slot}\n'
+            f'ATB rate (player): {you.player_atb_rate}\nATB rate (AI): {you.ai_atb_rate}\n'
+            f'Game version: {settings.GAME_VERSION}'
+        )
+
+        # Display the text in a messagebox
+        messagebox.showinfo('Party info', _msg)
+
+    def display_trainer_info(self):
+        ''' Display trainer info/help in a messagebox. '''
+        _hk = 'HOTKEYS:\n'
+        for _k, _v in settings.HOTKEYS.items():
+            _hk += f'{_k.title().replace("_", " ")}:    {_v.title()}\n'
+
+        _help = (
+            'Trainer by RogueAutomata\n\n'
+            'Source code/updates/requests:\n'
+            'https://github.com/mepley1/ff7r-trainer\n\n'
+            'Appearance + Hotkeys configurable in settings.py\n\n'
+            f'{_hk}'
+        )
+
+        # Display a messagebox with help text
+        messagebox.showinfo('Info', _help)
+
+# Initialize modmenu
+modmenu = CheatTrainer("FF7 Remake Trainer")
 
 
 # Initialize the PartyMember instances AFTER modmenu, since the labels are a character attribute
@@ -1236,6 +1315,9 @@ def main():
     # App control
     keyboard.add_hotkey(settings.HOTKEYS['EXIT'], modmenu.win.destroy)
     keyboard.add_hotkey(settings.HOTKEYS['HIDE_WINDOW'], modmenu.toggle_window)
+    # Info
+    keyboard.add_hotkey(settings.HOTKEYS['SHOW_PARTY_INFO'], modmenu.display_party_info)
+    keyboard.add_hotkey(settings.HOTKEYS['SHOW_TRAINER_INFO'], modmenu.display_trainer_info)
 
     # Tkinter main loop (display app window)
     modmenu.win.mainloop()
@@ -1245,4 +1327,5 @@ def main():
 
 # Mainloop
 if __name__ == '__main__':
+
     main()

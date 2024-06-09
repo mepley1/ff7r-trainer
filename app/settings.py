@@ -38,8 +38,11 @@ class Appearance:
 # but can also use a tuple of scan codes i.e. (29,42,78) for ctrl+shift+plus.
 # To find scan codes: run `python -m keyboard` in a terminal, then press keys.
 HOTKEYS = {
+    # App control
     'HIDE_WINDOW': 'Ctrl + Shift + F12',
     'EXIT': 'Ctrl + Shift + Del',
+    'SHOW_TRAINER_INFO': 'Ctrl + Shift + F8',
+    'SHOW_PARTY_INFO': 'Ctrl + Shift + F9',
 
     # Cheat hotkeys
     'CLOUD_GODMODE': 'Ctrl + Num 1',

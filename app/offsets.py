@@ -12,7 +12,8 @@ class Offsets:
         'atb_slots': [0xB6D80, 0x3E60, 0xE2],
         'limit': [0xB6D80, 0x3E60, 0xE4],
         'luck': [0xB6D80, 0x3E60, 0x118],
-        # 'strength': 
+        #'strength': 
+        #'magic':
         'p_def': [0xB6D80, 0x3E60, 0x110],
         'm_def': [0xB6D80, 0x3E60, 0x114],
         'p_atk': [0xB6D80, 0x3E60, 0x108],
@@ -30,7 +31,8 @@ class Offsets:
         'atb_slots': [0xB6D80, 0x3E60, 0x62], # byte
         'limit': [0xB6D80, 0x3E60, 0x64], # float
         'luck': [0xB6D80, 0x3E60, 0x98],
-        # 'strength': 
+        #'strength': 
+        #'magic':
         'p_def': [0xB6D80, 0x3E60, 0x90],
         'm_def': [0xB6D80, 0x3E60, 0x94],
         'p_atk': [0xB6D80, 0x3E60, 0x88],
@@ -49,6 +51,7 @@ class Offsets:
         'limit': [0xB6D80, 0x3E60, 0x24],  # float
         'luck': [0xB6D80, 0x3E60, 0x58],
         'strength': [0xB6D80, 0x3E60, 0x220],  # byte
+        'magic': [0xB6D80, 0x3E60, 0x224],  # byte
         'p_def': [0xB6D80, 0x3E60, 0x50],  # byte
         'm_def': [0xB6D80, 0x3E60, 0x54],  # byte
         'p_atk': [0xB6D80, 0x3E60, 0x48],
@@ -67,6 +70,7 @@ class Offsets:
         #limit:
         #luck:
         #strength:
+        #'magic':
         #p_def:
         #m_def:
         #p_atk:
@@ -84,7 +88,8 @@ class Offsets:
         'atb_slots': [0xB6D80, 0x3E60, 0x1A2], # guess??
         'limit': [0xB6D80, 0x3E60, 0x1A4],
         'luck': [0xB6D80, 0x3E60, 0x1D8],
-        # 'strength': 
+        #'strength': 
+        #'magic':
         'p_def': [0xB6D80, 0x3E60, 0x1D0],
         'm_def': [0xB6D80, 0x3E60, 0x1D4],
         'p_atk': [0xB6D80, 0x3E60, 0x1C8],
@@ -102,7 +107,8 @@ class Offsets:
         'atb_slots': [0xB6D80, 0x3E60, 0xA2], # 1 byte
         'limit': [0xB6D80, 0x3E60, 0xA4], # float
         'luck': [0xB6D80, 0x3E60, 0xD8],
-        # 'strength': 
+        #'strength': 
+        #'magic':
         'p_def': [0xB6D80, 0x3E60, 0xD0],
         'm_def': [0xB6D80, 0x3E60, 0xD4],
         'p_atk': [0xB6D80, 0x3E60, 0xC8],
@@ -120,7 +126,8 @@ class Offsets:
         'atb_slots': [0xB6D80, 0x3E60, 0x162], # guess???
         'limit': [0xB6D80, 0x3E60, 0x164], # guess???
         'luck': [0xB6D80, 0x3E60, 0x198],
-        # 'strength': 
+        #'strength': 
+        #'magic':
         'p_def': [0xB6D80, 0x3E60, 0x190],
         'm_def': [0xB6D80, 0x3E60, 0x194],
         'p_atk': [0xB6D80, 0x3E60, 0x188],
@@ -141,6 +148,7 @@ class Offsets:
         # From player_base:
         'controlled_char': [0xB6D80, 0x3E60, 0x5001B],
         'hard_mode': [0xB6D80, 0x3E60, 0x42F79], # 2 bytes
+        'play_time': [0xB6D80, 0x3E60, 0x2A0], # 4 bytes uint
     }
 
 
