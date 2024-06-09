@@ -1,9 +1,5 @@
 datetime
-functools
 keyboard
 logging
 pymem
-threading
-time
-tkinter
 typing
