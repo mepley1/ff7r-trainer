@@ -878,7 +878,7 @@ class ModMenu():
 
         # Image 
         if settings.Appearance.SHOW_IMAGE:
-            self.image = PhotoImage(file="ff7r.png")
+            self.image = PhotoImage(file="assets/ff7r.png")
             self.image_label = Label(image=self.image, background=settings.Appearance.BG, height=140)
             self.image_label.grid(column=0, row=3, sticky='news', columnspan=2)
 
