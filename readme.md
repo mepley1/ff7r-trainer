@@ -6,16 +6,30 @@ A cheat trainer for FF7 Remake Intergrade.
 
 Create and activate a venv in root dir, install requirements, then run ./app/gui.py.
 
+On Windows:
+
 `python -m venv venv`
 
-`./venv/scripts/activate.ps1`
+`./venv/Scripts/Activate.ps1`
 
 `pip install -r requirements.txt`
 
 `python ./app/gui.py`
 
-# Options
+# Config
 
 Configure hotkeys/appearance in `settings.py`.
 
+# Screenshots
+
+Default:
+
 ![Demo image](demo.png?raw=true)
+
+Transparent window: (`TRANSPARENT_BG = True`)
+
+![Demo image](demo1-trans.jpg)
+
+Solid window: (`TRANSPARENT_BG = False`)
+
+![Demo image](demo2-solid.jpg)
