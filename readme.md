@@ -14,7 +14,7 @@ On Windows:
 
 `pip install -r requirements.txt`
 
-`python ./app/gui.py`
+`python ./app/gui.py` (game must be running)
 
 # Config
 
