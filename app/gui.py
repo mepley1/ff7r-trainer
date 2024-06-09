@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+""" Main app module, contains GUI and logic. """
 
 import keyboard # for hotkeys
 import logging, sys
