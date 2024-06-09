@@ -20,16 +20,22 @@ On Windows:
 
 Configure hotkeys/appearance in `settings.py`.
 
+# Build
+
+1. Configure settings (mainly `TRANSPARENT_BG` and `SHOW_IMAGE`, if you want to change them);
+2. Activate venv;
+3. Execute `build.bat`.
+
 # Screenshots
 
 Default:
 
-![Demo image](demo.png?raw=true)
+![Demo image](screens/demo.png)
 
 Transparent window: (`TRANSPARENT_BG = True`)
 
-![Demo image](demo1-trans.jpg)
+![Demo image](screens/trans.jpg)
 
 Solid window: (`TRANSPARENT_BG = False`)
 
-![Demo image](demo2-solid.jpg)
+![Demo image](screens/solid.jpg)
