@@ -17,6 +17,5 @@ notes*
 *.zip
 offsets2.py
 build/
-build.bat
 dist/
 *.spec
