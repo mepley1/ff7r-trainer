@@ -286,8 +286,12 @@ class Player():
         '''
         _current_inv = mem.read_uint(getPtrAddr(player_base, _item_offsets))
         _num = int(_num)
-        logging.debug(f'Currently have: {_current_inv} of {_item_name}; adding {_num} more. New qty: {_current_inv + _num}')
-        mem.write_uint(getPtrAddr(player_base, _item_offsets), _current_inv + _num)
+        # Don't write >99 of an item, except for Gil
+        _new_qty = min(_current_inv + _num, 99) if not _item_offsets == Offsets.item_offsets['Gil'] else _current_inv + _num
+
+        _msg = f'Current qty: {_current_inv} {_item_name}; adding {_num}. New qty: {_new_qty}'
+        logging.debug(_msg)
+        mem.write_uint(getPtrAddr(player_base, _item_offsets), _new_qty)
 
 # It's YOU, get it?
 you = Player(
