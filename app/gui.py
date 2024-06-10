@@ -1163,6 +1163,9 @@ class CheatTrainer():
             return None
 
         you.give_arbitrary_item(_item_name, _offsets, _qty)
+        # Indicate success on GUI label:
+        temp_change_property([modmenu.spacer04], 'text', f'Added {_qty} {_item_name}', '')
+        temp_change_property([modmenu.spacer04], 'foreground', settings.Appearance.ACTIVE, settings.Appearance.FG)
 
     def toggle_window(self) -> None:
         ''' Toggle show/hide window. '''
