@@ -22,8 +22,10 @@ Configure hotkeys/appearance in `settings.py`.
 
 # Build
 
-1. Configure settings (mainly `TRANSPARENT_BG` and `SHOW_IMAGE`, if you want to change them);
-2. Activate venv;
+On Windows, from project root dir:
+
+1. Configure settings if desired (mainly `TRANSPARENT_BG` and `SHOW_IMAGE`, if you want to change them);
+2. Activate venv `./venv/Scripts/Activate.ps1`;
 3. Execute `build.bat`.
 
 # Screenshots
