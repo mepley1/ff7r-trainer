@@ -57,7 +57,9 @@ print('\n Attempting to attach to ff7remake_.exe ...')
 try:
     mem = Pymem('ff7remake_.exe')
 except pymem.exception.ProcessNotFound:
-    logging.error('Game not running? Couldn\'t find ff7remake_.exe. Launch game and try again.')
+    _not_found_msg = 'Couldn\'t find ff7remake_.exe. Launch game and try again.'
+    logging.error(_not_found_msg)
+    messagebox.showerror('Error', _not_found_msg)
     sys.exit(0)
 game_module = module_from_name(mem.process_handle, 'ff7remake_.exe').lpBaseOfDll
 
