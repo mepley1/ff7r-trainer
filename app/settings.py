@@ -10,6 +10,7 @@ GAME_VERSION = 'epic'
 class Appearance:
     TRANSPARENT_BG = False
     SHOW_IMAGE = True
+    HEADER_IMG_PATH = 'assets/whispersb1.png'
 
     # Colors
     BG = '#000813'

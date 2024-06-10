@@ -898,9 +898,9 @@ class CheatTrainer():
         self.author_label = Label(self.win, text='By rogueautomata')
         self.author_label.grid(column=0, row=2, sticky='news', padx=48, columnspan=2)
 
-        # Image 
+        # Image
         if settings.Appearance.SHOW_IMAGE:
-            self.image = PhotoImage(file="assets/ff7r.png")
+            self.image = PhotoImage(file=settings.Appearance.HEADER_IMG_PATH)
             self.image_label = Label(image=self.image, background=settings.Appearance.BG, height=140)
             self.image_label.grid(column=0, row=3, sticky='news', columnspan=2)
 
