@@ -10,7 +10,7 @@ GAME_VERSION = 'epic'
 class Appearance:
     TRANSPARENT_BG = False
     SHOW_IMAGE = True
-    HEADER_IMG_PATH = 'assets/whispersb1.png'
+    HEADER_IMG_PATH = 'assets/ff7r.png'
 
     # Colors
     BG = '#000813'
@@ -40,28 +40,28 @@ class Appearance:
 # To find scan codes: run `python -m keyboard` in a terminal, then press keys.
 HOTKEYS = {
     # App control
-    'HIDE_WINDOW': 'Ctrl + Shift + F12',
     'EXIT': 'Ctrl + Shift + Del',
-    'SHOW_TRAINER_INFO': 'Ctrl + Shift + F8',
-    'SHOW_PARTY_INFO': 'Ctrl + Shift + F9',
+    'SHOW_TRAINER_INFO': 'Ctrl + Shift + F10',
+    'SHOW_PARTY_INFO': 'Ctrl + Shift + F11',
+    'HIDE_WINDOW': 'Ctrl + Shift + F12',
 
     # Cheat hotkeys
-    'CLOUD_GODMODE': 'Ctrl + Num 1',
-    'CLOUD_INF_MP': 'Ctrl + Num 2',
-    'CLOUD_INF_ATB': 'Ctrl + Num 3',
+    'CLOUD_GODMODE': 'Ctrl + Shift + Num 1',
+    'CLOUD_INF_MP': 'Ctrl + Shift + Num 2',
+    'CLOUD_INF_ATB': 'Ctrl + Shift + Num 3',
     'CLOUD_ATK_BOOST': 'Ctrl + Shift + Num /',
 
-    'AERITH_GODMODE': 'Ctrl + Num 4',
-    'AERITH_INF_MP': 'Ctrl + Num 5',
-    'AERITH_INF_ATB': 'Ctrl + Num 6',
+    'AERITH_GODMODE': 'Ctrl + Shift + Num 4',
+    'AERITH_INF_MP': 'Ctrl + Shift + Num 5',
+    'AERITH_INF_ATB': 'Ctrl + Shift + Num 6',
 
-    'ALL_CHARS_GODMODE': 'Ctrl + Shift + Num 1',
-    'ALL_CHARS_INF_MP': 'Ctrl + Shift + Num 2',
-    'ALL_CHARS_INF_ATB': 'Ctrl + Shift + Num 3',
-    'ALL_CHARS_INF_LIMIT': 'Ctrl + Shift + Num 4',
+    'ALL_CHARS_GODMODE': 'Ctrl + Num 1',
+    'ALL_CHARS_INF_MP': 'Ctrl + Num 2',
+    'ALL_CHARS_INF_ATB': 'Ctrl + Num 3',
+    'ALL_CHARS_INF_LIMIT': 'Ctrl + Num 4',
 
     # For 'add item' widget
-    'ADD_ITEM': 'Ctrl + Shift + Plus',
+    'ADD_ITEM': 'Ctrl + Plus',
 }
 
 ### FONTS ###
@@ -74,3 +74,9 @@ FONTS = {
     'FONT_SIZE': '9',
     'FONT_SIZE_TITLE': '12',
 }
+
+### DEBUGGING/DEVELOPMENT OPTIONS ###
+# Don't create process handle before initializing GUI (bool):
+SKIP_CREATING_PROCESS_HANDLE = False
+# Log to stdout or a file named log.log. ('file' or 'stdout')
+LOG_TARGET = 'stdout'

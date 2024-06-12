@@ -47,32 +47,39 @@ intro_message = '''
 '''
 
 # Configure logging
-logging.basicConfig(level=logging.DEBUG, stream=sys.stdout)
+
+if settings.LOG_TARGET == 'stdout':
+    logging.basicConfig(level=logging.DEBUG, stream=sys.stdout)
+else:
+    # If running via pythonw.exe then I'll want logs in a file.
+    # Write mode rather than default append, to keep only logs from last run.
+    logging.basicConfig(level=logging.DEBUG, filename='log.log', filemode='w')
 
 # Print intro
 print(intro_message)
 
 # Attach to exe
-print('\n Attempting to attach to ff7remake_.exe ...')
-try:
-    mem = Pymem('ff7remake_.exe')
-except pymem.exception.ProcessNotFound:
-    _not_found_msg = 'Couldn\'t find ff7remake_.exe. Launch game and try again.'
-    logging.error(_not_found_msg)
-    messagebox.showerror('Error', _not_found_msg)
-    sys.exit(0)
-game_module = module_from_name(mem.process_handle, 'ff7remake_.exe').lpBaseOfDll
+if not settings.SKIP_CREATING_PROCESS_HANDLE:
+ 
+    logging.debug('Attempting to attach to ff7remake_.exe ...')
+    try:
+        mem = Pymem('ff7remake_.exe')
+    except pymem.exception.ProcessNotFound:
+        _not_found_msg = 'Couldn\'t find ff7remake_.exe. Launch game and try again.'
+        logging.error(_not_found_msg)
+        messagebox.showerror('Error', _not_found_msg)
+        sys.exit(0)
+    game_module = module_from_name(mem.process_handle, 'ff7remake_.exe').lpBaseOfDll
 
+    ### Pointers
 
-### Pointers
-
-# Base
-if settings.GAME_VERSION == 'epic':
-    player_base = game_module + 0x579D6E8
-    data_base = game_module + 0x57F75B8
-elif GAME_VERSION == 'steam':
-    player_base = game_module + 0x57A57E8
-    data_base = game_module + 0x57F75B8
+    # Base
+    if settings.GAME_VERSION == 'epic':
+        player_base = game_module + 0x579D6E8
+        data_base = game_module + 0x57F75B8
+    elif GAME_VERSION == 'steam':
+        player_base = game_module + 0x57A57E8
+        data_base = game_module + 0x57F75B8
 
 #base_3 = game_module + 0x0579DAE8 #'Somewhat' interchangeable with player_base; see notes on converting pointers.
 
@@ -277,11 +284,12 @@ class Player():
         ''' Hardmode AP multiplier (Setter). '''
         mem.write_uint(getPtrAddr(data_base, self.offsets['hard_mode_ap_multiplier']), _target)
 
-    def give_arbitrary_item(self, _item_name: str, _item_offsets: List[int], _num: int = 1) -> None:
+    @staticmethod
+    def give_arbitrary_item(_item_name: str, _item_offsets: List[int], _num: int = 1) -> None:
         '''Give an arbitrary item. Called by GUI optionmenu.
             Args:
                 _item_name: Name of item, as in offsets.item_offsets[]
-                _item_offsets: Item offsets, as in offsets.item_offsets[]
+                _item_offsets: The item's offsets, as in offsets.item_offsets[]
                 _num: Quantity to give
         '''
         _current_inv = mem.read_uint(getPtrAddr(player_base, _item_offsets))
@@ -733,7 +741,8 @@ class PartyMember():
             self.magic_atk = 3000
             sleep(2)
 
-    # Test version of the above loops, but with arbitrary stat to freeze
+    # Test version of the above loops, but with arbitrary stat to freeze. 
+    #(un-used/testing)
     def freeze_stat_loop(self, _stop_event, _stat_to_freeze, _value_to_freeze_at) -> None:
         '''Freeze a given stat.'''
         logging.debug('Beginning a <cheat> loop')
@@ -1181,13 +1190,15 @@ class CheatTrainer():
             self.is_hidden = True
             self.win.withdraw()
 
-    def log_error(self, _msg: str = 'Invalid input'):
+    @staticmethod
+    def log_error(_msg: str = 'Invalid input'):
         ''' Display an error messagebox, and log same message to log handler. 
             Starts a thread to prevent messagebox from blocking highlight methods etc. '''
         logging.error(_msg)
         temp_change_property([modmenu.spacer04], 'text', _msg, '')
 
-    def display_party_info(self):
+    @staticmethod
+    def display_party_info():
         ''' Display current party member stats in a messagebox. '''
         _msg = 'Current party:\n\n'
 
@@ -1214,7 +1225,8 @@ class CheatTrainer():
         # Display the text in a messagebox
         messagebox.showinfo('Party info', _msg)
 
-    def display_trainer_info(self):
+    @staticmethod
+    def display_trainer_info():
         ''' Display trainer info/help in a messagebox. '''
         _hk = 'HOTKEYS:\n'
         for _k, _v in settings.HOTKEYS.items():
