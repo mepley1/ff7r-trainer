@@ -1,21 +1,37 @@
-
+# pycache
 __pycache__
-__pycache__/
+*.pyc
+# environments
 venv
+wenv
+env
+.venv
+.env
+launch.json
+# logs
 *.log
+log/
+# testing
 test/
 test*
+# temp/scratch
 temp/
 notes.txt
 notes*
 *bak*
 *.bak
-*.db
-*.exe
-*.sqlite
-*.7z
-*.zip
+*.old
 offsets2.py
+# dbs
+*.db
+*.sqlite
+*.sql
+# build/package
 build/
 dist/
+*.exe
 *.spec
+*.7z
+*.zip
+*.tar
+*.gz
