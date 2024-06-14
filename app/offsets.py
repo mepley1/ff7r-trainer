@@ -61,21 +61,21 @@ class Offsets:
     }
 
     Red = {
-        #hp:
-        #max_hp:
-        #mp:
-        #max_mp:
-        #atb:
-        #atb_slots:
-        #limit:
-        #luck:
-        #strength:
+        'hp': [0xB6D80, 0x3E60, 0x130],
+        'max_hp': [0xB6D80, 0x3E60, 0x134],
+        'mp': [0xB6D80, 0x3E60, 0x138],
+        'max_mp': [0xB6D80, 0x3E60, 0x13C],
+        'atb': [0xB6D80, 0x3E60, 0x144],
+        #'atb_slots':
+        #'limit':
+        'luck': [0xB6D80, 0x3E60, 0x158],
+        #'strength':
         #'magic':
-        #p_def:
-        #m_def:
-        #p_atk:
-        #m_atk:
-        #exp:
+        'p_def': [0xB6D80, 0x3E60, 0x150],
+        'm_def': [0xB6D80, 0x3E60, 0x154],
+        'p_atk': [0xB6D80, 0x3E60, 0x148],
+        'm_atk': [0xB6D80, 0x3E60, 0x14C],
+        'exp': [0xB6D80, 0x3E60, 0x140],
         'in_party': [0xb6d80, 0x3e60, 0x50020],
     }
 
