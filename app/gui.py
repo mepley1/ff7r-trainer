@@ -53,7 +53,7 @@ if settings.LOG_TARGET == 'stdout':
 else:
     # If running via pythonw.exe then I'll want logs in a file.
     # Write mode rather than default append, to keep only logs from last run.
-    logging.basicConfig(level=logging.DEBUG, filename='log.log', filemode='w')
+    logging.basicConfig(level=logging.DEBUG, filename=settings.LOG_FILE, filemode='w')
 
 # Print intro
 print(intro_message)
@@ -886,11 +886,11 @@ class CheatTrainer():
             self.win.wm_attributes('-transparentcolor', settings.Appearance.BG)
 
         # Add some default widget options, to reduce repeating styles. Use values from settings.py
-        self.win.option_add("*Font", (settings.FONTS['TEXT'], settings.FONTS['FONT_SIZE']))
+        self.win.option_add("*Font", (settings.Appearance.FONTS['TEXT'], settings.Appearance.FONTS['FONT_SIZE']))
 
         self.win.option_add("*Label*Background", settings.Appearance.BG)
         self.win.option_add("*Label*Foreground", settings.Appearance.FG)
-        self.win.option_add("*Label*Font", (settings.FONTS['TEXT'], settings.FONTS['FONT_SIZE']))
+        self.win.option_add("*Label*Font", (settings.Appearance.FONTS['TEXT'], settings.Appearance.FONTS['FONT_SIZE']))
 
         # If transparent_bg set, then set a bg color for buttons. Otherwise they'll be buggy
         if settings.Appearance.TRANSPARENT_BG:
@@ -898,14 +898,14 @@ class CheatTrainer():
         else:
             self.win.option_add("*Button*Background", settings.Appearance.BG)
         self.win.option_add("*Button*Foreground", settings.Appearance.FG)
-        self.win.option_add("*Button*Font", (settings.FONTS['TEXT'], settings.FONTS['FONT_SIZE']))
+        self.win.option_add("*Button*Font", (settings.Appearance.FONTS['TEXT'], settings.Appearance.FONTS['FONT_SIZE']))
         self.win.option_add("*Button*BorderWidth", 1)
         self.win.option_add("*Button*Relief", "solid")
 
         ### WIDGETS
 
         ## Title label
-        self.title_label = Label(self.win, text=window_title, font=(settings.FONTS['TITLE'], settings.FONTS['FONT_SIZE_TITLE']), foreground=settings.Appearance.BLUE)
+        self.title_label = Label(self.win, text=window_title, font=(settings.Appearance.FONTS['TITLE'], settings.Appearance.FONTS['FONT_SIZE_TITLE']), foreground=settings.Appearance.BLUE)
         self.title_label.grid(column=0, row=1, sticky='news', padx=48, columnspan=2)
 
         self.author_label = Label(self.win, text='By rogueautomata')
@@ -918,8 +918,8 @@ class CheatTrainer():
             self.image_label.grid(column=0, row=3, sticky='news', columnspan=2)
 
         ## Info labels
-        self.hotkeys_label = Label(self.win, text='Hotkey', font=(settings.FONTS['TITLE'], settings.FONTS['FONT_SIZE_TITLE']), foreground=settings.Appearance.BLUE)
-        self.effect_label = Label(self.win, text='Effect', font=(settings.FONTS['TITLE'], settings.FONTS['FONT_SIZE_TITLE']), foreground=settings.Appearance.BLUE)
+        self.hotkeys_label = Label(self.win, text='Hotkey', font=(settings.Appearance.FONTS['TITLE'], settings.Appearance.FONTS['FONT_SIZE_TITLE']), foreground=settings.Appearance.BLUE)
+        self.effect_label = Label(self.win, text='Effect', font=(settings.Appearance.FONTS['TITLE'], settings.Appearance.FONTS['FONT_SIZE_TITLE']), foreground=settings.Appearance.BLUE)
 
         self.hotkeys_label.grid(column=0, row=5, sticky='wns', pady=(0,16))
         self.effect_label.grid(column=1, row=5, sticky='wns', pady=(0,16))
@@ -1022,7 +1022,7 @@ class CheatTrainer():
         self.qty_entry = Entry(
             self.win, 
             textvariable=self.qty_var, 
-            font=(settings.FONTS['TEXT'], int(settings.FONTS['FONT_SIZE'])-1), 
+            font=(settings.Appearance.FONTS['TEXT'], int(settings.Appearance.FONTS['FONT_SIZE'])-1), 
             bg=settings.Appearance.BG_ENTRY, 
             fg=settings.Appearance.FG, 
             bd=0, 
@@ -1038,7 +1038,7 @@ class CheatTrainer():
             self.win, 
             text="Amount:", 
             fg=settings.Appearance.DIM, 
-            font=(settings.FONTS['TEXT'], int(settings.FONTS['FONT_SIZE'])), 
+            font=(settings.Appearance.FONTS['TEXT'], int(settings.Appearance.FONTS['FONT_SIZE'])), 
             justify='right',
         ).grid(column=0, row=63, sticky='w')
 
@@ -1056,7 +1056,7 @@ class CheatTrainer():
             bd=0, 
             activebackground=settings.Appearance.BG_ENTRY, 
             activeforeground=settings.Appearance.FG, 
-            font=(settings.FONTS['TEXT'], int(settings.FONTS['FONT_SIZE'])), 
+            font=(settings.Appearance.FONTS['TEXT'], int(settings.Appearance.FONTS['FONT_SIZE'])), 
             padx=0, pady=0, 
             highlightthickness=0, 
             highlightbackground=settings.Appearance.DIM, 
@@ -1068,7 +1068,7 @@ class CheatTrainer():
             fg=settings.Appearance.FG,
             activebackground=settings.Appearance.BLUE, 
             activeforeground=settings.Appearance.BG, 
-            font=(settings.FONTS['TEXT'], int(settings.FONTS['FONT_SIZE'])-1),
+            font=(settings.Appearance.FONTS['TEXT'], int(settings.Appearance.FONTS['FONT_SIZE'])-1),
             borderwidth=0, 
             border=0, 
             bd=0,
@@ -1248,6 +1248,7 @@ modmenu = CheatTrainer("FF7 Remake Trainer")
 
 
 # Initialize the PartyMember instances AFTER modmenu, since the labels are a character attribute
+logging.debug('Initializing party members...')
 
 aerith = PartyMember('Aerith',
     offsets = Offsets.Aerith,
@@ -1317,6 +1318,7 @@ def main():
     '''Main.'''
 
     ### SET HOTKEYS
+    logging.debug('Setting up hotkeys...')
     # Cloud
     keyboard.add_hotkey(settings.HOTKEYS['CLOUD_GODMODE'], cloud.toggle_godmode)
     keyboard.add_hotkey(settings.HOTKEYS['CLOUD_INF_MP'], cloud.toggle_inf_mp)
@@ -1341,9 +1343,11 @@ def main():
     keyboard.add_hotkey(settings.HOTKEYS['SHOW_TRAINER_INFO'], modmenu.display_trainer_info)
 
     # Tkinter main loop (display app window)
+    logging.debug('Launching tkinter loop...')
     modmenu.win.mainloop()
 
     # Exit 0 after quitting from GUI
+    logging.debug('Exiting program.')
     sys.exit(0)
 
 # Mainloop

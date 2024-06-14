@@ -32,6 +32,17 @@ class Appearance:
     #GREEN = '#A9ff4E' # Bright green
     #MAGENTA_LIGHT = '#FF66B0' # Lighter magenta
 
+    ### FONTS ###
+    # Others won't have these fonts installed, so I'm keeping them configurable.
+    FONTS = {
+        'TEXT': 'Play',
+        'TITLE': 'Impact',
+        'SPECIAL': 'Play',
+
+        'FONT_SIZE': '9',
+        'FONT_SIZE_TITLE': '12',
+    }
+
 ### HOTKEYS ###
 # Used by `keyboard` module to set hotkeys, and also displayed on GUI window.
 # To edit, use any format readable by `keyboard` module; 
@@ -49,7 +60,7 @@ HOTKEYS = {
     'CLOUD_GODMODE': 'Ctrl + Shift + Num 1',
     'CLOUD_INF_MP': 'Ctrl + Shift + Num 2',
     'CLOUD_INF_ATB': 'Ctrl + Shift + Num 3',
-    'CLOUD_ATK_BOOST': 'Ctrl + Shift + Num /',
+    'CLOUD_ATK_BOOST': 'Ctrl + Shift + /',
 
     'AERITH_GODMODE': 'Ctrl + Shift + Num 4',
     'AERITH_INF_MP': 'Ctrl + Shift + Num 5',
@@ -64,19 +75,9 @@ HOTKEYS = {
     'ADD_ITEM': 'Ctrl + Plus',
 }
 
-### FONTS ###
-# Others won't have these fonts installed, so I'm keeping them configurable.
-FONTS = {
-    'TEXT': 'Play',
-    'TITLE': 'Impact',
-    'SPECIAL': 'Play',
-
-    'FONT_SIZE': '9',
-    'FONT_SIZE_TITLE': '12',
-}
-
-### DEBUGGING/DEVELOPMENT OPTIONS ###
+### DEBUGGING/DEVELOPMENT ###
 # Don't create process handle before initializing GUI (bool):
 SKIP_CREATING_PROCESS_HANDLE = False
-# Log to stdout or a file named log.log. ('file' or 'stdout')
+# Log to either stdout or a file. ('file' or 'stdout')
 LOG_TARGET = 'stdout'
+LOG_FILE = 'log.log'
