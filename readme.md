@@ -22,7 +22,9 @@ Configure hotkeys/appearance in `settings.py`.
 
 # Build
 
-On Windows, from project root dir:
+Activate venv, then run `./build_all.bat`. It will automate building with Cython, package with pyinstaller and leave an exe in `/dist`.
+
+To build without Cythonizing:
 
 1. Configure settings if desired (mainly `TRANSPARENT_BG` and `SHOW_IMAGE`, if you want to change them);
 2. Activate venv `./venv/Scripts/Activate.ps1`;
@@ -36,7 +38,7 @@ Or, build with Cython before packaging with pyinstaller:
 3. `python setup.py build_ext --inplace`, then move the generated gui.pyd to `./app` dir;
 4. `build_cy.bat`
 
-Either way, the final .exe will be in `/dist`.
+Either way, the resulting .exe will be in `/dist`.
 
 # Screenshots
 
