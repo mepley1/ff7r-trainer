@@ -1,5 +1,6 @@
 """ Main app module, contains GUI and logic. """
 
+import cython
 import functools
 import keyboard
 import logging, sys
@@ -16,7 +17,7 @@ from typing import List
 import settings #settings.py - App settings
 from offsets import Offsets #offsets.py - All offsets
 
-intro_message = '''
+intro_message: str = '''
  ███████████ ███████████ ██████████                                  
 ░░███░░░░░░█░░███░░░░░░█░███░░░░███                                  
  ░███   █ ░  ░███   █ ░ ░░░    ███                                   
@@ -48,14 +49,18 @@ intro_message = '''
 
 # Configure logging
 
-if settings.LOG_TARGET == 'stdout':
+if settings.LOG_TARGET == 'stdout' and not cython.compiled:
     logging.basicConfig(level=logging.DEBUG, stream=sys.stdout)
 else:
     # If running via pythonw.exe then I'll want logs in a file.
     # Write mode rather than default append, to keep only logs from last run.
     logging.basicConfig(level=logging.DEBUG, filename=settings.LOG_FILE, filemode='w')
 
-# Print intro
+# Note:
+if cython.compiled:
+    logging.debug('Running Cython build.')
+
+# Print intro to stdout, don't spam logs with it.
 print(intro_message)
 
 # Attach to exe
@@ -65,7 +70,7 @@ if not settings.SKIP_CREATING_PROCESS_HANDLE:
     try:
         mem = Pymem('ff7remake_.exe')
     except pymem.exception.ProcessNotFound:
-        _not_found_msg = 'Couldn\'t find ff7remake_.exe. Launch game and try again.'
+        _not_found_msg: cython.unicode = 'Couldn\'t find ff7remake_.exe. Launch game and try again.'
         logging.error(_not_found_msg)
         messagebox.showerror('Error', _not_found_msg)
         sys.exit(0)
@@ -100,9 +105,11 @@ def getPtrAddr(base: int, offsets: List[int]) -> int:
 
 # Read a value (uint)
 # Un-used - for testing
+'''
 def read_uint(base, offsets: List[int]) -> int:
-    value = mem.read_uint(getPtrAddr(base, offsets))
+    value: cython.uint = mem.read_uint(getPtrAddr(base, offsets))
     return value
+'''
 
 # Highlight cheat label for a few seconds. (starts a thread to avoid blocking)
 def temp_highlight(labels: list, new_color=settings.Appearance.ACTIVE, normal_color=settings.Appearance.FG):
@@ -191,48 +198,48 @@ class Player():
     @timed_cache(minutes=1)
     def hard_mode(self) -> bool:
         '''Hard mode getter. True if hard mode, else False.'''
-        _ = mem.read_ushort(getPtrAddr(player_base, self.offsets['hard_mode']))
+        _: cython.ushort = mem.read_ushort(getPtrAddr(player_base, self.offsets['hard_mode']))
         return bool(_)
 
     @property
     @timed_cache(minutes=1)
     def atb_per_slot(self) -> int:
         '''ATB per bar. (Getter)'''
-        _ = mem.read_uint(getPtrAddr(data_base, self.offsets['atb_per_slot']))
+        _: cython.uint = mem.read_uint(getPtrAddr(data_base, self.offsets['atb_per_slot']))
         return _
 
     @property
     @timed_cache(minutes=1)
     def player_atb_rate(self) -> float:
         '''Player ATB rate. (Getter)'''
-        _ = mem.read_float(getPtrAddr(data_base, self.offsets['player_atb_rate']))
+        _: cython.float = mem.read_float(getPtrAddr(data_base, self.offsets['player_atb_rate']))
         return _
 
     @property
     @timed_cache(minutes=1)
     def ai_atb_rate(self) -> float:
         '''AI ATB rate. (getter)'''
-        _ = mem.read_float(getPtrAddr(data_base, self.offsets['ai_atb_rate']))
+        _: cython.float = mem.read_float(getPtrAddr(data_base, self.offsets['ai_atb_rate']))
         return _
 
     @property
     @timed_cache(minutes=1)
     def hard_mode_exp_multiplier(self) -> int:
         '''Hard mode experience multiplier. (Getter)'''
-        _ = mem.read_uint(getPtrAddr(data_base, self.offsets['hard_mode_exp_multiplier']))
+        _: cython.uint = mem.read_uint(getPtrAddr(data_base, self.offsets['hard_mode_exp_multiplier']))
         return _
 
     @property
     @timed_cache(minutes=1)
     def hard_mode_ap_multiplier(self) -> int:
         '''Hard mode AP multiplier. (Getter)'''
-        _ = mem.read_uint(getPtrAddr(data_base, self.offsets['hard_mode_ap_multiplier']))
+        _: cython.uint = mem.read_uint(getPtrAddr(data_base, self.offsets['hard_mode_ap_multiplier']))
         return _
 
     @property
     def play_time(self) -> int:
         '''Play time. (Getter)'''
-        _ = mem.read_uint(getPtrAddr(player_base, self.offsets['play_time']))
+        _: cython.uint = mem.read_uint(getPtrAddr(player_base, self.offsets['play_time']))
         return _
 
     # Controlled character getter (1 byte. offset from player_base)
@@ -285,17 +292,17 @@ class Player():
         mem.write_uint(getPtrAddr(data_base, self.offsets['hard_mode_ap_multiplier']), _target)
 
     @staticmethod
-    def give_arbitrary_item(_item_name: str, _item_offsets: List[int], _num: int = 1) -> None:
+    def give_arbitrary_item(_item_name: str, _item_offsets: List[int], _num: cython.uint = 1) -> None:
         '''Give an arbitrary item. Called by GUI optionmenu.
             Args:
                 _item_name: Name of item, as in offsets.item_offsets[]
                 _item_offsets: The item's offsets, as in offsets.item_offsets[]
                 _num: Quantity to give
         '''
-        _current_inv = mem.read_uint(getPtrAddr(player_base, _item_offsets))
-        _num = int(_num)
+        _current_inv: cython.uint = mem.read_uint(getPtrAddr(player_base, _item_offsets))
+        #_num = int(_num)
         # Don't write >99 of an item, except for Gil
-        _new_qty = min(_current_inv + _num, 99) if not _item_offsets == Offsets.item_offsets['Gil'] else _current_inv + _num
+        _new_qty: cython.uint = min(_current_inv + _num, 99) if not _item_offsets == Offsets.item_offsets['Gil'] else _current_inv + _num
 
         _msg = f'Current qty: {_current_inv} {_item_name}; adding {_num}. New qty: {_new_qty}'
         logging.debug(_msg)
@@ -313,10 +320,10 @@ class PartyMember():
     members = [] #List containing each instance (each party character). For all_chars cheats
 
     # Cheat-toggle class variables
-    all_godmode_on = False
-    all_inf_mp_on = False
-    all_inf_atb_on = False
-    all_inf_limit_on = False
+    all_godmode_on: cython.bint = False
+    all_inf_mp_on: cython.bint = False
+    all_inf_atb_on: cython.bint = False
+    all_inf_limit_on: cython.bint = False
 
     # Cheat thread stop events
     all_godmode_stop_event = Event() #set this event to stop godmode thread
@@ -508,11 +515,11 @@ class PartyMember():
         self.gui_labels = gui_labels #Dict of GUI labels that apply to each stat
 
         # Cheat bools
-        self.godmode_on = False
-        self.inf_mp_on = False
-        self.inf_atb_on = False
-        self.atk_boost_on = False
-        self.inf_limit_on = False
+        self.godmode_on: cython.bint = False
+        self.inf_mp_on: cython.bint = False
+        self.inf_atb_on: cython.bint = False
+        self.atk_boost_on: cython.bint = False
+        self.inf_limit_on: cython.bint = False
 
         # Cheat thread stop events
         self.godmode_stop_event = Event() #set this event to stop godmode thread
@@ -624,17 +631,17 @@ class PartyMember():
 
     # Current HP setter
     @current_hp.setter
-    def current_hp(self, _target_hp) -> None:
+    def current_hp(self, _target_hp: cython.ushort) -> None:
         mem.write_ushort(getPtrAddr(player_base, self.offsets['hp']), _target_hp)
 
     # Current MP setter
     @current_mp.setter
-    def current_mp(self, _target_mp) -> None:
+    def current_mp(self, _target_mp: cython.ushort) -> None:
         mem.write_ushort(getPtrAddr(player_base, self.offsets['mp']), _target_mp)
 
     # ATB setter
     @current_atb.setter
-    def current_atb(self, _target_atb) -> None:
+    def current_atb(self, _target_atb: cython.float) -> None:
         mem.write_float(getPtrAddr(player_base, self.offsets['atb']), _target_atb)
 
     # ATB Slots setter
@@ -646,18 +653,18 @@ class PartyMember():
 
     # Limit setter
     @current_limit.setter
-    def current_limit(self, _target_value) -> None:
+    def current_limit(self, _target_value: cython.float) -> None:
         ''' Limit break bar (setter). '''
         mem.write_float(getPtrAddr(player_base, self.offsets['limit']), _target_value)
 
     # Physical ATK setter
     @atk.setter
-    def atk(self, _target_value) -> None:
+    def atk(self, _target_value: cython.ushort) -> None:
         mem.write_ushort(getPtrAddr(player_base, self.offsets['p_atk']), _target_value)
 
     # Magic atk setter
     @magic_atk.setter
-    def magic_atk(self, _target_value) -> None:
+    def magic_atk(self, _target_value: cython.ushort) -> None:
         mem.write_ushort(getPtrAddr(player_base, self.offsets['m_atk']), _target_value)
 
     # Luck setter
@@ -1169,7 +1176,7 @@ class CheatTrainer():
 
         # Grab entered quantity
         try:
-            _qty = int(self.qty_var.get())
+            _qty: cython.uint = int(self.qty_var.get())
         except ValueError:
             self.log_error('Invalid quantity!')
             temp_highlight_bg([self.qty_entry,], settings.Appearance.ERROR, settings.Appearance.BG_ENTRY)
@@ -1210,6 +1217,9 @@ class CheatTrainer():
                 f'MP: {_.current_mp}/{_.max_mp}\n'
                 f'ATB: {_.current_atb} / Slots: {_.atb_slots}\n'
                 f'Limit: {_.current_limit}\n'
+                f'Phy/Mag Atk: {_.atk} / {_.magic_atk}\n'
+                f'Phy/Mag Def: {_.defense} / {_.mag_defense}\n'
+                f'Luck: {_.luck}\n'
                 '\n'
             )
 
@@ -1232,7 +1242,7 @@ class CheatTrainer():
         for _k, _v in settings.HOTKEYS.items():
             _hk += f'{_k.title().replace("_", " ")}:    {_v.title()}\n'
 
-        _help = (
+        _help: cython.unicode = (
             'Trainer by RogueAutomata\n\n'
             'Source code/updates/requests:\n'
             'https://github.com/mepley1/ff7r-trainer\n\n'
@@ -1352,5 +1362,4 @@ def main():
 
 # Mainloop
 if __name__ == '__main__':
-
     main()
