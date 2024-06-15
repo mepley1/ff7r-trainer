@@ -23,6 +23,7 @@ test/
 test*
 temp/
 temp*
+tmp/
 # dbs
 *.db
 *.sqlite
