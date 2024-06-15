@@ -52,9 +52,9 @@ class Appearance:
 HOTKEYS = {
     # App control
     'EXIT': 'Ctrl + Shift + Del',
-    'SHOW_TRAINER_INFO': 'Ctrl + Shift + F10',
-    'SHOW_PARTY_INFO': 'Ctrl + Shift + F11',
-    'HIDE_WINDOW': 'Ctrl + Shift + F12',
+    'SHOW_TRAINER_INFO': 'Ctrl + F10',
+    'SHOW_PARTY_INFO': 'Ctrl + F11',
+    'HIDE_WINDOW': 'Ctrl + F12',
 
     # Cheat hotkeys
     'CLOUD_GODMODE': 'Ctrl + Shift + Num 1',
@@ -70,6 +70,7 @@ HOTKEYS = {
     'ALL_CHARS_INF_MP': 'Ctrl + Num 2',
     'ALL_CHARS_INF_ATB': 'Ctrl + Num 3',
     'ALL_CHARS_INF_LIMIT': 'Ctrl + Num 4',
+    'ALL_CHARS_ATK_BOOST': 'Ctrl + Num 5',
 
     # For 'add item' widget
     'ADD_ITEM': 'Ctrl + Plus',
@@ -79,5 +80,6 @@ HOTKEYS = {
 # Don't create process handle before initializing GUI (bool):
 SKIP_CREATING_PROCESS_HANDLE = False
 # Log to either stdout or a file. ('file' or 'stdout')
+# If running Cython build, app will log to the file regardless of LOG_TARGET setting.
 LOG_TARGET = 'stdout'
 LOG_FILE = 'log.log'

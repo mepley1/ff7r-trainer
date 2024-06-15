@@ -324,12 +324,14 @@ class PartyMember():
     all_inf_mp_on: cython.bint = False
     all_inf_atb_on: cython.bint = False
     all_inf_limit_on: cython.bint = False
+    all_atk_boost_on: cython.bint = False
 
     # Cheat thread stop events
     all_godmode_stop_event = Event() #set this event to stop godmode thread
     all_inf_mp_stop_event = Event()
     all_inf_atb_stop_event = Event()
     all_inf_limit_stop_event = Event()
+    all_atk_boost_stop_event = Event()
 
     # GUI labels for "all-chars" cheats
     ''' 
@@ -374,6 +376,13 @@ class PartyMember():
         for _ in cls.members:
             if _.in_party:
                 _.limit_refill()
+    
+    @classmethod
+    def all_atk_boost(cls) -> None:
+        '''Boost attack values, all chars. Effect is temporary; game will quickly re-calculate.'''
+        for _ in cls.members:
+            if _.in_party:
+                _.atk_boost()
 
     # TEST ALL CHARS GODMODE LOOP
     @classmethod
@@ -422,6 +431,19 @@ class PartyMember():
                 break
             cls.all_limit_refill()
             sleep(5)
+
+    # All chars Atk Boost loop
+    @classmethod
+    def all_atk_boost_loop(cls):
+        '''Attack Boost loop (all chars). Write atk + magic atk values every n seconds. Should be launched in a thread.'''
+        logging.debug('Launching Atk Boost loop (all characters) ...')
+        while True:
+            if cls.all_atk_boost_stop_event.is_set():
+                logging.debug('Breaking Atk Boost loop (all)...')
+                break
+            cls.all_atk_boost()
+            sleep(2)
+
 
     # TEST ALL CHARS GODMODE TOGGLE
     @classmethod
@@ -508,6 +530,28 @@ class PartyMember():
             for _ in (modmenu.all_chars_inf_limit_label, modmenu.all_chars_inf_limit_effect_label):
                 _.config(foreground=settings.Appearance.ACTIVE)
             logging.debug('Toggled Inf Limit ON (All chars)')
+
+    # Toggle Atk Boost all chars
+    @classmethod
+    def all_toggle_atk_boost(cls):
+        '''Toggle Attack Boost on/off - ALL CHARS.'''
+        if cls.all_atk_boost_on == True:
+            # If on, turn it off
+            cls.all_atk_boost_on = False
+            cls.all_atk_boost_stop_event.set()
+            # Update the gui labels
+            for _ in (modmenu.all_chars_atk_boost_label, modmenu.all_chars_atk_boost_effect_label):
+                _.config(foreground=settings.Appearance.FG)
+            logging.debug('Toggled Attack Boost OFF (All chars)')
+        elif cls.all_atk_boost_on == False:
+            # If off, turn it on
+            cls.all_atk_boost_on = True
+            cls.all_atk_boost_stop_event.clear()
+            Thread(target=cls.all_atk_boost_loop, daemon=True).start()
+            # Update the gui labels
+            for _ in (modmenu.all_chars_atk_boost_label, modmenu.all_chars_atk_boost_effect_label):
+                _.config(foreground=settings.Appearance.ACTIVE)
+            logging.debug('Toggled Attack Boost ON (All chars)')
 
     def __init__(self, char_name: StringVar, offsets: dict, gui_labels: dict):
         self.char_name = char_name
@@ -699,6 +743,13 @@ class PartyMember():
         if self.current_limit < 1500.0:
             self.current_limit = 1500.0
 
+    # Boost attack values
+    def atk_boost(self, _target: cython.ushort = 3000) -> None:
+        '''Boost both atk + magic atk. Temporary, game will recalculate quickly.'''
+        if self.atk < _target or self.magic_atk < _target:
+            self.atk = _target
+            self.magic_atk = _target
+
     # godmode loop to launch as thread
     def godmode_loop(self) -> None:
         ''' Heal character, in a loop. '''
@@ -744,8 +795,7 @@ class PartyMember():
         while True:
             if self.atk_boost_stop_event.is_set():
                 break
-            self.atk = 3000
-            self.magic_atk = 3000
+            self.atk_boost()
             sleep(2)
 
     # Test version of the above loops, but with arbitrary stat to freeze. 
@@ -920,9 +970,12 @@ class CheatTrainer():
 
         # Image
         if settings.Appearance.SHOW_IMAGE:
-            self.image = PhotoImage(file=settings.Appearance.HEADER_IMG_PATH)
-            self.image_label = Label(image=self.image, background=settings.Appearance.BG, height=140)
-            self.image_label.grid(column=0, row=3, sticky='news', columnspan=2)
+            try:
+                self.image = PhotoImage(file=settings.Appearance.HEADER_IMG_PATH)
+                self.image_label = Label(image=self.image, background=settings.Appearance.BG, height=140)
+                self.image_label.grid(column=0, row=3, sticky='news', columnspan=2)
+            except:
+                logging.error(f'Couldn\'t find image file settings.Appearance.HEADER_IMG_PATH')
 
         ## Info labels
         self.hotkeys_label = Label(self.win, text='Hotkey', font=(settings.Appearance.FONTS['TITLE'], settings.Appearance.FONTS['FONT_SIZE_TITLE']), foreground=settings.Appearance.BLUE)
@@ -1014,6 +1067,13 @@ class CheatTrainer():
 
         self.all_chars_inf_limit_effect_label = Label(self.win, text="All Inf Limit")
         self.all_chars_inf_limit_effect_label.grid(column=1, row=53, sticky='wns')
+
+        # Attack Boost all
+        self.all_chars_atk_boost_label = Label(self.win, text=settings.HOTKEYS['ALL_CHARS_ATK_BOOST'])
+        self.all_chars_atk_boost_label.grid(column=0, row=54, sticky='wns')
+
+        self.all_chars_atk_boost_effect_label = Label(self.win, text="All Attack Boost")
+        self.all_chars_atk_boost_effect_label.grid(column=1, row=54, sticky='wns')
 
         # Spacer
         self.spacer03 = Label(self.win).grid(column=0, row=55, columnspan=2)
@@ -1343,6 +1403,7 @@ def main():
     keyboard.add_hotkey(settings.HOTKEYS['ALL_CHARS_INF_MP'], PartyMember.all_toggle_inf_mp)
     keyboard.add_hotkey(settings.HOTKEYS['ALL_CHARS_INF_ATB'], PartyMember.all_toggle_inf_atb)
     keyboard.add_hotkey(settings.HOTKEYS['ALL_CHARS_INF_LIMIT'], PartyMember.all_toggle_inf_limit)
+    keyboard.add_hotkey(settings.HOTKEYS['ALL_CHARS_ATK_BOOST'], PartyMember.all_toggle_atk_boost)
     # Inventory
     keyboard.add_hotkey(settings.HOTKEYS['ADD_ITEM'], modmenu.get_item_selection)
     # App control
