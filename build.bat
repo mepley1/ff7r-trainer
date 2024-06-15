@@ -3,5 +3,5 @@ pyinstaller --onefile ^
     --noconsole ^
     --add-data=".\assets\ff7r.png;." ^
     --icon=".\assets\icon.ico" ^
-    --name="TRAINER_ff7r" ^
+    --name="TRAINER" ^
     .\app\gui.py
