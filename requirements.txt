@@ -1,5 +1,8 @@
-datetime
-keyboard
-logging
-pymem
-typing
+Cython==3.0.10
+DateTime==5.5
+keyboard==0.13.5
+logging==0.4.9.6
+Pymem==1.13.1
+pytz==2024.1
+typing==3.7.4.3
+zope.interface==6.4.post2
