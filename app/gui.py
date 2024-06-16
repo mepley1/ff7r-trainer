@@ -933,7 +933,7 @@ class CheatTrainer():
         self.win = Tk()
         self.win.overrideredirect(True)
         self.win.wm_attributes("-topmost", 1)
-        self.win.wm_attributes("-alpha", 0.8)
+        self.win.wm_attributes("-alpha", settings.Appearance.ALPHA)
         self.win.columnconfigure(0, weight=1)
         self.win.columnconfigure(1, weight=1)
 
@@ -977,7 +977,11 @@ class CheatTrainer():
                 self.image_label = Label(image=self.image, background=settings.Appearance.BG, height=140)
                 self.image_label.grid(column=0, row=3, sticky='news', columnspan=2)
             except:
-                logging.error(f'Couldn\'t find image file settings.Appearance.HEADER_IMG_PATH')
+                logging.error(f'Couldn\'t find image file: {settings.Appearance.HEADER_IMG_PATH}')
+        else:
+            # Create a label with similar width to keep things neat.
+            self.image_label = Label(background=settings.Appearance.BG, width=38)
+            self.image_label.grid(column=0, row=3, sticky='news', columnspan=2)
 
         ## Info labels
         self.hotkeys_label = Label(self.win, text='Hotkey', font=(settings.Appearance.FONTS['TITLE'], settings.Appearance.FONTS['FONT_SIZE_TITLE']), foreground=settings.Appearance.BLUE)

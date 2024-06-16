@@ -8,9 +8,11 @@ GAME_VERSION = 'epic'
 
 ### APPEARANCE OPTIONS ###
 class Appearance:
+    # Transparent background
     TRANSPARENT_BG = False
     SHOW_IMAGE = True
     HEADER_IMG_PATH = 'assets/ff7r.png'
+    ALPHA = 0.8
 
     # Colors
     BG = '#000813'
@@ -18,7 +20,9 @@ class Appearance:
     FG = '#FFFFFF'
     BLUE = '#53B9FF'
     BLACK = '#000000'
-    ACTIVE = '#EB4B98'
+    #ACTIVE = '#EB4B98'
+    ACTIVE = '#53B9FF'
+
     DIM = '#909090'
     ERROR = '#B02020'
 
@@ -50,8 +54,8 @@ class Appearance:
 HOTKEYS = {
     # App control
     'EXIT': 'Ctrl + Shift + Del',
-    'SHOW_TRAINER_INFO': 'Ctrl + F10',
-    'SHOW_PARTY_INFO': 'Ctrl + F11',
+    'SHOW_TRAINER_INFO': 'Ctrl + F9',
+    'SHOW_PARTY_INFO': 'Ctrl + F10',
     'HIDE_WINDOW': 'Ctrl + F12',
 
     # Cheat hotkeys
