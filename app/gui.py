@@ -56,6 +56,8 @@ else:
     # Write mode rather than default append, to keep only logs from last run.
     logging.basicConfig(level=logging.DEBUG, filename=settings.LOG_FILE, filemode='w')
 
+logging.debug(f'Launch time: {datetime.now()}')
+
 # Note:
 if cython.compiled:
     logging.debug('Running Cython build.')
@@ -119,7 +121,7 @@ def temp_highlight(labels: list, new_color=settings.Appearance.ACTIVE, normal_co
     def highlight():
         for label in labels:
             label.config(fg=new_color)
-        sleep(2)
+        sleep(settings.Appearance.FEEDBACK_COOLDOWN)
         for label in labels:
             label.config(fg=normal_color)
 
@@ -134,7 +136,7 @@ def temp_highlight_bg(labels: list, new_color=settings.Appearance.ACTIVE, normal
     def highlight():
         for label in labels:
             label.config(bg=new_color)
-        sleep(2)
+        sleep(settings.Appearance.FEEDBACK_COOLDOWN)
         for label in labels:
             label.config(bg=normal_color)
 
@@ -150,7 +152,7 @@ def temp_change_property(labels: list, label_property, new_color: str = settings
         for label in labels:
             #label.config(prop=new_color)
             label[label_property] = new_color
-        sleep(2)
+        sleep(settings.Appearance.FEEDBACK_COOLDOWN)
         for label in labels:
             #label.config(prop=normal_color)
             label[label_property] = normal_color
@@ -292,7 +294,7 @@ class Player():
         mem.write_uint(getPtrAddr(data_base, self.offsets['hard_mode_ap_multiplier']), _target)
 
     @staticmethod
-    def give_arbitrary_item(_item_name: str, _item_offsets: List[int], _num: cython.uint = 1) -> None:
+    def give_arbitrary_item(_item_name: cython.unicode, _item_offsets: List[int], _num: cython.uint = 1) -> None:
         '''Give an arbitrary item. Called by GUI optionmenu.
             Args:
                 _item_name: Name of item, as in offsets.item_offsets[]
@@ -317,7 +319,7 @@ you = Player(
 class PartyMember():
     ### Class variables:
 
-    members = [] #List containing each instance (each party character). For all_chars cheats
+    members: list = [] #List containing each instance (each party character). For all_chars cheats
 
     # Cheat-toggle class variables
     all_godmode_on: cython.bint = False
@@ -351,14 +353,14 @@ class PartyMember():
 
     @classmethod
     def heal_all(cls) -> None:
-        '''Heal all characters.'''
+        '''Heal all characters in party.'''
         for _ in cls.members:
             if _.in_party:
                 _.heal()
 
     @classmethod
     def all_mp_refill(cls) -> None:
-        '''MP refill all chars.'''
+        '''MP refill all chars in party.'''
         for _ in cls.members:
             if _.in_party:
                 _.mp_refill()
@@ -577,7 +579,7 @@ class PartyMember():
 
     # Current HP getter
     @property
-    def current_hp(self) -> int:
+    def current_hp(self) -> cython.ushort:
         '''Return current HP.'''
         return mem.read_ushort(getPtrAddr(player_base, self.offsets['hp']))
 
@@ -744,7 +746,7 @@ class PartyMember():
             self.current_limit = 1500.0
 
     # Boost attack values
-    def atk_boost(self, _target: cython.ushort = 3000) -> None:
+    def atk_boost(self, _target: cython.ushort = 2500) -> None:
         '''Boost both atk + magic atk. Temporary, game will recalculate quickly.'''
         if self.atk < _target or self.magic_atk < _target:
             self.atk = _target
@@ -1316,79 +1318,78 @@ class CheatTrainer():
 # Initialize modmenu
 modmenu = CheatTrainer("FF7 Remake Trainer")
 
-
-# Initialize the PartyMember instances AFTER modmenu, since the labels are a character attribute
-logging.debug('Initializing party members...')
-
-aerith = PartyMember('Aerith',
-    offsets = Offsets.Aerith,
-    gui_labels = {
-        'godmode': (modmenu.aerith_godmode_label, modmenu.aerith_godmode_effect_label),
-        'inf_mp': (modmenu.aerith_inf_mp_label, modmenu.aerith_inf_mp_effect_label),
-        'inf_atb': (modmenu.aerith_inf_atb_label, modmenu.aerith_inf_atb_effect_label),
-    },
-)
-
-barret = PartyMember('Barret',
-    offsets = Offsets.Barret,
-    gui_labels = {
-        # Barret labels not made yet!
-        #'godmode': (modmenu.barret_godmode_label, modmenu.barret_godmode_effect_label),
-        #'inf_mp': (modmenu.barret_inf_mp_label, modmenu.barret_inf_mp_effect_label),
-        #'inf_atb': (modmenu.barret_inf_atb_label, modmenu.barret_inf_atb_effect_label),
-    },
-)
-
-cloud = PartyMember('Cloud',
-    offsets = Offsets.Cloud,
-    gui_labels = {
-        'godmode': (modmenu.cloud_godmode_label, modmenu.cloud_godmode_effect_label),
-        'inf_mp': (modmenu.mp_label, modmenu.mp_effect_label),
-        'inf_atb': (modmenu.cloud_atb_label, modmenu.atb_effect_label),
-        'atk_boost': (modmenu.cloud_atk_boost_label, modmenu.cloud_atk_boost_effect_label),
-    },
-)
-
-red = PartyMember('Red',
-    offsets = Offsets.Red,
-    gui_labels = {},
-)
-
-tifa = PartyMember('Tifa',
-    offsets = Offsets.Tifa,
-    gui_labels = {
-        # Tifa labels not made yet!
-        #'godmode': (modmenu.tifa_godmode_label, modmenu.tifa_godmode_effect_label),
-        #'inf_mp': (modmenu.tifa_inf_mp_label, modmenu.tifa_inf_mp_effect_label),
-        #'inf_atb': (modmenu.tifa_inf_atb_label, modmenu.tifa_inf_atb_effect_label),
-    },
-)
-
-yuffie = PartyMember('Yuffie',
-    offsets = Offsets.Yuffie,
-    gui_labels = {
-        # yuffie labels not made yet!
-        #'godmode': (modmenu.yuffie_godmode_label, modmenu.yuffie_godmode_effect_label),
-        #'inf_mp': (modmenu.yuffie_inf_mp_label, modmenu.yuffie_inf_mp_effect_label),
-        #'inf_atb': (modmenu.yuffie_inf_atb_label, modmenu.yuffie_inf_atb_effect_label),
-    },
-)
-
-sonon = PartyMember('Sonon',
-    offsets = Offsets.Sonon,
-    gui_labels = {
-        # sonon labels not made yet!
-        #'godmode': (modmenu.sonon_godmode_label, modmenu.sonon_godmode_effect_label),
-        #'inf_mp': (modmenu.sonon_inf_mp_label, modmenu.sonon_inf_mp_effect_label),
-        #'inf_atb': (modmenu.sonon_inf_atb_label, modmenu.sonon_inf_atb_effect_label),
-    },
-)
-
 def main():
     '''Main.'''
 
+    # Initialize the PartyMember instances AFTER modmenu, since the labels are a character attribute
+    logging.debug('Initializing party members...')
+
+    aerith = PartyMember('Aerith',
+        offsets = Offsets.Aerith,
+        gui_labels = {
+            'godmode': (modmenu.aerith_godmode_label, modmenu.aerith_godmode_effect_label),
+            'inf_mp': (modmenu.aerith_inf_mp_label, modmenu.aerith_inf_mp_effect_label),
+            'inf_atb': (modmenu.aerith_inf_atb_label, modmenu.aerith_inf_atb_effect_label),
+        },
+    )
+
+    barret = PartyMember('Barret',
+        offsets = Offsets.Barret,
+        gui_labels = {
+            # Barret labels not made yet!
+            #'godmode': (modmenu.barret_godmode_label, modmenu.barret_godmode_effect_label),
+            #'inf_mp': (modmenu.barret_inf_mp_label, modmenu.barret_inf_mp_effect_label),
+            #'inf_atb': (modmenu.barret_inf_atb_label, modmenu.barret_inf_atb_effect_label),
+        },
+    )
+
+    cloud = PartyMember('Cloud',
+        offsets = Offsets.Cloud,
+        gui_labels = {
+            'godmode': (modmenu.cloud_godmode_label, modmenu.cloud_godmode_effect_label),
+            'inf_mp': (modmenu.mp_label, modmenu.mp_effect_label),
+            'inf_atb': (modmenu.cloud_atb_label, modmenu.atb_effect_label),
+            'atk_boost': (modmenu.cloud_atk_boost_label, modmenu.cloud_atk_boost_effect_label),
+        },
+    )
+
+    red = PartyMember('Red',
+        offsets = Offsets.Red,
+        gui_labels = {},
+    )
+
+    tifa = PartyMember('Tifa',
+        offsets = Offsets.Tifa,
+        gui_labels = {
+            # Tifa labels not made yet!
+            #'godmode': (modmenu.tifa_godmode_label, modmenu.tifa_godmode_effect_label),
+            #'inf_mp': (modmenu.tifa_inf_mp_label, modmenu.tifa_inf_mp_effect_label),
+            #'inf_atb': (modmenu.tifa_inf_atb_label, modmenu.tifa_inf_atb_effect_label),
+        },
+    )
+
+    yuffie = PartyMember('Yuffie',
+        offsets = Offsets.Yuffie,
+        gui_labels = {
+            # yuffie labels not made yet!
+            #'godmode': (modmenu.yuffie_godmode_label, modmenu.yuffie_godmode_effect_label),
+            #'inf_mp': (modmenu.yuffie_inf_mp_label, modmenu.yuffie_inf_mp_effect_label),
+            #'inf_atb': (modmenu.yuffie_inf_atb_label, modmenu.yuffie_inf_atb_effect_label),
+        },
+    )
+
+    sonon = PartyMember('Sonon',
+        offsets = Offsets.Sonon,
+        gui_labels = {
+            # sonon labels not made yet!
+            #'godmode': (modmenu.sonon_godmode_label, modmenu.sonon_godmode_effect_label),
+            #'inf_mp': (modmenu.sonon_inf_mp_label, modmenu.sonon_inf_mp_effect_label),
+            #'inf_atb': (modmenu.sonon_inf_atb_label, modmenu.sonon_inf_atb_effect_label),
+        },
+    )
+
     ### SET HOTKEYS
-    logging.debug('Setting up hotkeys...')
+    logging.debug('Registering hotkeys...')
     # Cloud
     keyboard.add_hotkey(settings.HOTKEYS['CLOUD_GODMODE'], cloud.toggle_godmode)
     keyboard.add_hotkey(settings.HOTKEYS['CLOUD_INF_MP'], cloud.toggle_inf_mp)

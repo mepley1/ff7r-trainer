@@ -27,11 +27,6 @@ class Appearance:
         # to be less distracting when overlaying game window.
         BG_ENTRY = '#000000'
 
-    # Extras / Not currently used
-    #BG_LIGHT = '#00193D'
-    #GREEN = '#A9ff4E' # Bright green
-    #MAGENTA_LIGHT = '#FF66B0' # Lighter magenta
-
     ### FONTS ###
     # Others won't have these fonts installed, so I'm keeping them configurable.
     FONTS = {
@@ -42,6 +37,9 @@ class Appearance:
         'FONT_SIZE': '9',
         'FONT_SIZE_TITLE': '12',
     }
+
+    # Time to display error messages/highlight labels on cheat usage.
+    FEEDBACK_COOLDOWN = 2
 
 ### HOTKEYS ###
 # Used by `keyboard` module to set hotkeys, and also displayed on GUI window.
