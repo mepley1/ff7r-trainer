@@ -83,5 +83,5 @@ HOTKEYS = {
 SKIP_CREATING_PROCESS_HANDLE = False
 # Log to either stdout or a file. ('file' or 'stdout')
 # If running Cython build, app will log to the file regardless of LOG_TARGET setting.
-LOG_TARGET = 'stdout'
+LOG_TARGET = 'file'
 LOG_FILE = 'log.log'
