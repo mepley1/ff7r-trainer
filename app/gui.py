@@ -17,6 +17,10 @@ from typing import List
 import settings #settings.py - App settings
 from offsets import Offsets #offsets.py - All offsets
 
+if getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS'):
+    # Import pyinstaller splash module if app was bundled with pyinstaller
+    import pyi_splash
+
 intro_message: str = '''
  ███████████ ███████████ ██████████                                  
 ░░███░░░░░░█░░███░░░░░░█░███░░░░███                                  
@@ -47,14 +51,26 @@ intro_message: str = '''
                         - code@mepley.net -
 '''
 
-# Configure logging
+# Functions to control splash screen added by pyinstaller
+def update_splash(spl_txt: str = '') -> None:
+    '''Update splash screen text, if running pyi bundle.'''
+    if getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS'):
+        pyi_splash.update_text(spl_txt)
 
-if settings.LOG_TARGET == 'stdout' and not cython.compiled:
+def kill_splash() -> None:
+    '''Kill pyinstaller splash screen.'''
+    if getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS'):
+        pyi_splash.close()
+
+# Configure logging
+if settings.LOG_TARGET == 'stdout':
     logging.basicConfig(level=logging.DEBUG, stream=sys.stdout)
 else:
     # If running via pythonw.exe then I'll want logs in a file.
     # Write mode rather than default append, to keep only logs from last run.
     logging.basicConfig(level=logging.DEBUG, filename=settings.LOG_FILE, filemode='w')
+# Print intro to stdout, don't spam logs with it.
+print(intro_message)
 
 logging.debug(f'Launch time: {datetime.now()}')
 
@@ -62,18 +78,20 @@ logging.debug(f'Launch time: {datetime.now()}')
 if cython.compiled:
     logging.debug('Running Cython build.')
 
-# Print intro to stdout, don't spam logs with it.
-print(intro_message)
-
 # Attach to exe
 if not settings.SKIP_CREATING_PROCESS_HANDLE:
  
     logging.debug('Attempting to attach to ff7remake_.exe ...')
+    update_splash('Getting process handle ...')
+
     try:
         mem = Pymem('ff7remake_.exe')
     except pymem.exception.ProcessNotFound:
         _not_found_msg: cython.unicode = 'Couldn\'t find ff7remake_.exe. Launch game and try again.'
         logging.error(_not_found_msg)
+        # Close pyinstaller splash screen if present
+        kill_splash()
+        # Display error message in a tk messagebox and exit
         messagebox.showerror('Error', _not_found_msg)
         sys.exit(0)
     game_module = module_from_name(mem.process_handle, 'ff7remake_.exe').lpBaseOfDll
@@ -1319,14 +1337,17 @@ class CheatTrainer():
         # Display a messagebox with help text
         messagebox.showinfo('Info', _help)
 
-# Initialize modmenu
+
+# Initialize trainer
 modmenu = CheatTrainer("FF7 Remake Trainer")
+
 
 def main():
     '''Main.'''
 
     # Initialize the PartyMember instances AFTER modmenu, since the labels are a character attribute
-    logging.debug('Initializing party members...')
+    logging.debug('Initializing characters...')
+    update_splash('Initializing characters...')
 
     aerith = PartyMember('Aerith',
         offsets = Offsets.Aerith,
@@ -1417,6 +1438,9 @@ def main():
     # Info
     keyboard.add_hotkey(settings.HOTKEYS['SHOW_PARTY_INFO'], modmenu.display_party_info)
     keyboard.add_hotkey(settings.HOTKEYS['SHOW_TRAINER_INFO'], modmenu.display_trainer_info)
+
+    # Kill the splash screen
+    kill_splash()
 
     # Tkinter main loop (display app window)
     logging.debug('Launching tkinter loop...')
