@@ -24,4 +24,5 @@ import settings #settings.py - App settings
 from offsets import Offsets #offsets.py - All offsets
 
 #Entry point
-gui.main()
+if __name__ == "__main__":
+    gui.main()

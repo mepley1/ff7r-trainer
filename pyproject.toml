@@ -1,0 +1,61 @@
+[project]
+name = "ff7r-trainer"
+description = "Cheat trainer for Final Fantasy VII Remake Intergrade"
+readme = "readme.md"
+version = "0.1b1"
+dependencies = [
+    "Cython >= 3.0.10",
+    "DateTime >= 5.5",
+    "keyboard >= 0.13.5",
+    "logging >= 0.4.9.6",
+    "Pymem >= 1.13.1",
+    "pytz >= 2024.1",
+    "typing >= 3.7.4.3",
+    "zope.interface >= 6.4.post2",
+]
+requires-python = ">= 3.10"
+authors = [
+    {name = "RogueAutomata", email = "rogueautomata@mepley.net"},
+]
+classifiers = [
+    "Private :: Do Not Upload",
+    "License :: OSI Approved :: MIT License",
+    "Development Status :: 3 - Alpha",
+    "Programming Language :: Python :: 3.10",
+]
+keywords = ["cheats", "games", "final fantasy"]
+
+[project.urls]
+Repository = "https://github.com/mepley1/ff7-trainer"
+Homepage = "https://mepley.net"
+
+[project.optional-dependencies]
+dev = [
+    "Cython >= 3.0.10",
+]
+
+[build-system]
+requires = [
+    "setuptools",
+    "Cython >= 3.0.10",
+    "wheel",
+]
+build-backend = "setuptools.build_meta"
+
+[tool.cython]
+annotate = true  # Optional: Include annotations
+# List Cython modules to build
+ext_modules = ["app.gui", "app.settings", "app.offsets"]
+language_level = 3  # Optional: Set the Cython language level
+
+[tool.setuptools]
+packages = ["app"]
+package-dir = {"" = "."}
+zip-safe = false
+include-package-data = true
+
+[project.scripts]
+trainer = "app.gui:main"
+current_party = "app.gui:PartyMember.current_party"
+party_info = "app.gui:CheatTrainer.display_party_info"
+

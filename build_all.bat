@@ -21,7 +21,7 @@ pyinstaller ^
     --clean ^
     .\TRAiNER.spec
 
-echo ######## Copying ff7r.png to .\dist ... ########
+echo ######## Copying ff7r.png to .\dist\assets ... ########
 if not exist .\dist\assets\NUL mkdir .\dist\assets
 copy ".\assets\ff7r.png" ".\dist\assets\ff7r.png"
 
