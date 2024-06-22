@@ -17,39 +17,10 @@ from typing import List
 import settings #settings.py - App settings
 from offsets import Offsets #offsets.py - All offsets
 
+# Import pyinstaller splash module if app was bundled with pyinstaller
+# Ref: https://pyinstaller.org/en/stable/runtime-information.html
 if getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS'):
-    # Import pyinstaller splash module if app was bundled with pyinstaller
     import pyi_splash
-
-intro_message: str = '''
- ███████████ ███████████ ██████████                                  
-░░███░░░░░░█░░███░░░░░░█░███░░░░███                                  
- ░███   █ ░  ░███   █ ░ ░░░    ███                                   
- ░███████    ░███████         ███                                    
- ░███░░░█    ░███░░░█        ███                                     
- ░███  ░     ░███  ░        ███                                      
- █████       █████         ███                                       
-░░░░░       ░░░░░         ░░░                                        
- ███████████                                      █████              
-░░███░░░░░███                                    ░░███               
- ░███    ░███   ██████  █████████████    ██████   ░███ █████  ██████ 
- ░██████████   ███░░███░░███░░███░░███  ░░░░░███  ░███░░███  ███░░███
- ░███░░░░░███ ░███████  ░███ ░███ ░███   ███████  ░██████░  ░███████ 
- ░███    ░███ ░███░░░   ░███ ░███ ░███  ███░░███  ░███░░███ ░███░░░  
- █████   █████░░██████  █████░███ █████░░████████ ████ █████░░██████ 
-░░░░░   ░░░░░  ░░░░░░  ░░░░░ ░░░ ░░░░░  ░░░░░░░░ ░░░░ ░░░░░  ░░░░░░  
- ███████████                      ███                                
-░█░░░███░░░█                     ░░░                                 
-░   ░███  ░  ████████   ██████   ████  ████████    ██████  ████████  
-    ░███    ░░███░░███ ░░░░░███ ░░███ ░░███░░███  ███░░███░░███░░███ 
-    ░███     ░███ ░░░   ███████  ░███  ░███ ░███ ░███████  ░███ ░░░  
-    ░███     ░███      ███░░███  ░███  ░███ ░███ ░███░░░   ░███      
-    █████    █████    ░░████████ █████ ████ █████░░██████  █████     
-   ░░░░░    ░░░░░      ░░░░░░░░ ░░░░░ ░░░░ ░░░░░  ░░░░░░  ░░░░░      
-                        - by RogueAutomata -
-                   - 100% organic LLM-free code -
-                        - code@mepley.net -
-'''
 
 # Functions to control splash screen added by pyinstaller
 def update_splash(spl_txt: str = '') -> None:
@@ -69,8 +40,9 @@ else:
     # If running via pythonw.exe then I'll want logs in a file.
     # Write mode rather than default append, to keep only logs from last run.
     logging.basicConfig(level=logging.DEBUG, filename=settings.LOG_FILE, filemode='w')
+
 # Print intro to stdout, don't spam logs with it.
-print(intro_message)
+print(settings.intro_msg)
 
 logging.debug(f'Launch time: {datetime.now()}')
 
@@ -87,7 +59,7 @@ if not settings.SKIP_CREATING_PROCESS_HANDLE:
     try:
         mem = Pymem('ff7remake_.exe')
     except pymem.exception.ProcessNotFound:
-        _not_found_msg: cython.unicode = 'Couldn\'t find ff7remake_.exe. Launch game and try again.'
+        _not_found_msg: str = 'Couldn\'t find ff7remake_.exe. Launch game and try again.'
         logging.error(_not_found_msg)
         # Close pyinstaller splash screen if present
         kill_splash()
@@ -180,7 +152,7 @@ def temp_change_property(labels: list, label_property, new_color: str = settings
 
 # Update cheat label's text color (permanent).
 # un-used / testing
-def update_label_color(color: StringVar, *labels):
+def update_label_color(color: str, *labels):
     for label in labels:
         label.config(fg=color)
 
@@ -337,7 +309,8 @@ you = Player(
 class PartyMember():
     ### Class variables:
 
-    members: list = [] #List containing each instance (each party character). For all_chars cheats
+    #all_characters: list = [] #List containing each instance (each party character). For all_chars cheats
+    all_characters: set = set()
 
     # Cheat-toggle class variables
     all_godmode_on: cython.bint = False
@@ -345,6 +318,7 @@ class PartyMember():
     all_inf_atb_on: cython.bint = False
     all_inf_limit_on: cython.bint = False
     all_atk_boost_on: cython.bint = False
+    all_luck_boost_on: cython.bint = False
 
     # Cheat thread stop events
     all_godmode_stop_event = Event() #set this event to stop godmode thread
@@ -352,57 +326,67 @@ class PartyMember():
     all_inf_atb_stop_event = Event()
     all_inf_limit_stop_event = Event()
     all_atk_boost_stop_event = Event()
+    all_luck_boost_stop_event = Event()
 
     # GUI labels for "all-chars" cheats
     ''' 
-    # Right now this is breaking cuz modmenu isn't initialized yet.
+    # Right now this is breaking because ct_gui isn't initialized yet.
     all_gui_labels = {
-        'godmode': (modmenu.all_chars_godmode_label, modmenu.all_chars_godmode_effect_label),
-        'inf_mp': (modmenu.all_chars_inf_mp_label, modmenu.all_chars_inf_mp_effect_label),
-        'inf_atb': (modmenu.all_chars_inf_atb_label, modmenu.all_chars_inf_atb_effect_label),
+        'godmode': (ct_gui.all_chars_godmode_label, ct_gui.all_chars_godmode_effect_label),
+        'inf_mp': (ct_gui.all_chars_inf_mp_label, ct_gui.all_chars_inf_mp_effect_label),
+        'inf_atb': (ct_gui.all_chars_inf_atb_label, ct_gui.all_chars_inf_atb_effect_label),
     }
     '''
 
     @classmethod
-    def current_party(cls) -> list:
-        '''Return all characters currently in party.'''
-        _p = [_ for _ in cls.members if _.in_party]
+    def current_party(cls) -> set:
+        '''Return a set of all characters currently in party.'''
+        _p: set = {_ for _ in cls.all_characters if _.in_party}
         return _p
 
     @classmethod
     def heal_all(cls) -> None:
         '''Heal all characters in party.'''
-        for _ in cls.members:
+        for _ in cls.all_characters:
             if _.in_party:
                 _.heal()
 
     @classmethod
     def all_mp_refill(cls) -> None:
         '''MP refill all chars in party.'''
-        for _ in cls.members:
+        for _ in cls.all_characters:
             if _.in_party:
                 _.mp_refill()
 
     @classmethod
     def all_atb_refill(cls) -> None:
         '''ATB refill, all characters.'''
-        for _ in cls.members:
+        for _ in cls.all_characters:
             if _.in_party:
                 _.atb_refill()
 
     @classmethod
     def all_limit_refill(cls) -> None:
         '''Limit refill, all chars.'''
-        for _ in cls.members:
+        for _ in cls.all_characters:
             if _.in_party:
                 _.limit_refill()
     
     @classmethod
     def all_atk_boost(cls) -> None:
         '''Boost attack values, all chars. Effect is temporary; game will quickly re-calculate.'''
-        for _ in cls.members:
+        for _ in cls.all_characters:
             if _.in_party:
                 _.atk_boost()
+
+    @classmethod
+    def all_luck_boost(cls) -> None:
+        '''Boost luck value, all chars. Effect is temporary; game will quickly re-calculate.'''
+        #for _ in cls.all_characters:
+        #    if _.in_party:
+        #        _.luck = 255
+        for _ in cls.current_party():
+            _.luck = 255
 
     # TEST ALL CHARS GODMODE LOOP
     @classmethod
@@ -464,6 +448,18 @@ class PartyMember():
             cls.all_atk_boost()
             sleep(2)
 
+    # All chars Luck Boost loop
+    @classmethod
+    def all_luck_boost_loop(cls):
+        '''Luck Boost loop (all chars). Write Luck value every n secs. Should be launched in a thread.'''
+        logging.debug('Launching Luck Boost loop (all characters) ...')
+        while True:
+            if cls.all_luck_boost_stop_event.is_set():
+                logging.debug('Breaking Luck Boost loop (all)...')
+                break
+            cls.all_luck_boost()
+            sleep(2)
+
 
     # TEST ALL CHARS GODMODE TOGGLE
     @classmethod
@@ -475,7 +471,7 @@ class PartyMember():
             cls.all_godmode_stop_event.set()
             # Update the gui labels
             #for _ in cls.all_gui_labels['godmode']:
-            for _ in (modmenu.all_chars_godmode_label, modmenu.all_chars_godmode_effect_label):
+            for _ in (ct_gui.all_chars_godmode_label, ct_gui.all_chars_godmode_effect_label):
                 _.config(foreground=settings.Appearance.FG)
         elif cls.all_godmode_on == False:
             # If off, turn it on
@@ -484,7 +480,7 @@ class PartyMember():
             Thread(target=cls.all_godmode_loop, daemon=True).start()
             # Update the gui labels
             #for _ in cls.all_gui_labels['godmode']:
-            for _ in (modmenu.all_chars_godmode_label, modmenu.all_chars_godmode_effect_label):
+            for _ in (ct_gui.all_chars_godmode_label, ct_gui.all_chars_godmode_effect_label):
                 _.config(foreground=settings.Appearance.ACTIVE)
             logging.debug(f'Toggled godmode ON (ALL chars)')
 
@@ -497,7 +493,7 @@ class PartyMember():
             cls.all_inf_mp_on = False
             cls.all_inf_mp_stop_event.set()
             # Update the gui labels
-            for _ in (modmenu.all_chars_inf_mp_label, modmenu.all_chars_inf_mp_effect_label):
+            for _ in (ct_gui.all_chars_inf_mp_label, ct_gui.all_chars_inf_mp_effect_label):
                 _.config(foreground=settings.Appearance.FG)
         elif cls.all_inf_mp_on == False:
             # If off, turn it on
@@ -505,7 +501,7 @@ class PartyMember():
             cls.all_inf_mp_stop_event.clear()
             Thread(target=cls.all_inf_mp_loop, daemon=True).start()
             # Update the gui labels
-            for _ in (modmenu.all_chars_inf_mp_label, modmenu.all_chars_inf_mp_effect_label):
+            for _ in (ct_gui.all_chars_inf_mp_label, ct_gui.all_chars_inf_mp_effect_label):
                 _.config(foreground=settings.Appearance.ACTIVE)
             logging.debug('Toggled Inf MP ON (All chars)')
 
@@ -518,7 +514,7 @@ class PartyMember():
             cls.all_inf_atb_on = False
             cls.all_inf_atb_stop_event.set()
             # Update the gui labels
-            for _ in (modmenu.all_chars_inf_atb_label, modmenu.all_chars_inf_atb_effect_label):
+            for _ in (ct_gui.all_chars_inf_atb_label, ct_gui.all_chars_inf_atb_effect_label):
                 _.config(foreground=settings.Appearance.FG)
         elif cls.all_inf_atb_on == False:
             # If off, turn it on
@@ -526,7 +522,7 @@ class PartyMember():
             cls.all_inf_atb_stop_event.clear()
             Thread(target=cls.all_inf_atb_loop, daemon=True).start()
             # Update the gui labels
-            for _ in (modmenu.all_chars_inf_atb_label, modmenu.all_chars_inf_atb_effect_label):
+            for _ in (ct_gui.all_chars_inf_atb_label, ct_gui.all_chars_inf_atb_effect_label):
                 _.config(foreground=settings.Appearance.ACTIVE)
             logging.debug('Toggled Inf ATB ON (All chars)')
 
@@ -539,7 +535,7 @@ class PartyMember():
             cls.all_inf_limit_on = False
             cls.all_inf_limit_stop_event.set()
             # Update the gui labels
-            for _ in (modmenu.all_chars_inf_limit_label, modmenu.all_chars_inf_limit_effect_label):
+            for _ in (ct_gui.all_chars_inf_limit_label, ct_gui.all_chars_inf_limit_effect_label):
                 _.config(foreground=settings.Appearance.FG)
         elif cls.all_inf_limit_on == False:
             # If off, turn it on
@@ -547,7 +543,7 @@ class PartyMember():
             cls.all_inf_limit_stop_event.clear()
             Thread(target=cls.all_inf_limit_loop, daemon=True).start()
             # Update the gui labels
-            for _ in (modmenu.all_chars_inf_limit_label, modmenu.all_chars_inf_limit_effect_label):
+            for _ in (ct_gui.all_chars_inf_limit_label, ct_gui.all_chars_inf_limit_effect_label):
                 _.config(foreground=settings.Appearance.ACTIVE)
             logging.debug('Toggled Inf Limit ON (All chars)')
 
@@ -560,7 +556,7 @@ class PartyMember():
             cls.all_atk_boost_on = False
             cls.all_atk_boost_stop_event.set()
             # Update the gui labels
-            for _ in (modmenu.all_chars_atk_boost_label, modmenu.all_chars_atk_boost_effect_label):
+            for _ in (ct_gui.all_chars_atk_boost_label, ct_gui.all_chars_atk_boost_effect_label):
                 _.config(foreground=settings.Appearance.FG)
             logging.debug('Toggled Attack Boost OFF (All chars)')
         elif cls.all_atk_boost_on == False:
@@ -569,9 +565,31 @@ class PartyMember():
             cls.all_atk_boost_stop_event.clear()
             Thread(target=cls.all_atk_boost_loop, daemon=True).start()
             # Update the gui labels
-            for _ in (modmenu.all_chars_atk_boost_label, modmenu.all_chars_atk_boost_effect_label):
+            for _ in (ct_gui.all_chars_atk_boost_label, ct_gui.all_chars_atk_boost_effect_label):
                 _.config(foreground=settings.Appearance.ACTIVE)
             logging.debug('Toggled Attack Boost ON (All chars)')
+
+    # Toggle Luck Boost all chars
+    @classmethod
+    def all_toggle_luck_boost(cls):
+        '''Toggle Luck Boost on/off - ALL CHARS.'''
+        if cls.all_luck_boost_on == True:
+            # If on, turn it off
+            cls.all_luck_boost_on = False
+            cls.all_luck_boost_stop_event.set()
+            # Update the gui labels
+            for _ in (ct_gui.all_chars_luck_boost_label, ct_gui.all_chars_luck_boost_effect_label):
+                _.config(foreground=settings.Appearance.FG)
+            logging.debug('Toggled Luck Boost OFF (All chars)')
+        elif cls.all_luck_boost_on == False:
+            # If off, turn it on
+            cls.all_luck_boost_on = True
+            cls.all_luck_boost_stop_event.clear()
+            Thread(target=cls.all_luck_boost_loop, daemon=True).start()
+            # Update the gui labels
+            for _ in (ct_gui.all_chars_luck_boost_label, ct_gui.all_chars_luck_boost_effect_label):
+                _.config(foreground=settings.Appearance.ACTIVE)
+            logging.debug('Toggled Luck Boost ON (All chars)')
 
     def __init__(self, char_name: StringVar, offsets: dict, gui_labels: dict):
         self.char_name = char_name
@@ -593,7 +611,7 @@ class PartyMember():
         self.inf_limit_stop_event = Event()
 
         # Append self to list of party characters
-        PartyMember.members.append(self)
+        PartyMember.all_characters.add(self)
 
     # Current HP getter
     @property
@@ -820,15 +838,15 @@ class PartyMember():
 
     # Test version of the above loops, but with arbitrary stat to freeze. 
     #(un-used/testing)
-    def freeze_stat_loop(self, _stop_event, _stat_to_freeze, _value_to_freeze_at) -> None:
+    def freeze_stat_loop(self, _stop_event, _stat, _target_val) -> None:
         '''Freeze a given stat.'''
         logging.debug('Beginning a <cheat> loop')
         while True:
             if _stop_event.is_set():
                 logging.debug('breaking loop...')
                 break
-            if _stat_to_freeze < _value_to_freeze_at:
-                _stat_to_freeze = _value_to_freeze_at
+            if _stat < _target_val:
+                _stat = _target_val
             sleep(0.5)
 
     ### TOGGLES for cheat daemons
@@ -946,7 +964,7 @@ class PartyMember():
 class CheatTrainer():
     def __init__(self, window_title):
 
-        self.is_hidden = False #For window hiding
+        self.is_hidden: cython.bint = False #For window hiding
 
         self.win = Tk()
         self.win.overrideredirect(True)
@@ -1099,8 +1117,15 @@ class CheatTrainer():
         self.all_chars_atk_boost_effect_label = Label(self.win, text="All Attack Boost")
         self.all_chars_atk_boost_effect_label.grid(column=1, row=54, sticky='wns')
 
+        # Luck Boost all
+        self.all_chars_luck_boost_label = Label(self.win, text=settings.HOTKEYS['ALL_CHARS_LUCK_BOOST'])
+        self.all_chars_luck_boost_label.grid(column=0, row=55, sticky='wns')
+
+        self.all_chars_luck_boost_effect_label = Label(self.win, text="All Luck Boost")
+        self.all_chars_luck_boost_effect_label.grid(column=1, row=55, sticky='wns')
+
         # Spacer
-        self.spacer03 = Label(self.win).grid(column=0, row=55, columnspan=2)
+        self.spacer03 = Label(self.win).grid(column=0, row=59, columnspan=2)
 
         ### "Add items" menu ###
 
@@ -1268,8 +1293,8 @@ class CheatTrainer():
 
         you.give_arbitrary_item(_item_name, _offsets, _qty)
         # Indicate success on GUI label:
-        temp_change_property([modmenu.spacer04], 'text', f'Added {_qty} {_item_name}', '')
-        temp_change_property([modmenu.spacer04], 'foreground', settings.Appearance.ACTIVE, settings.Appearance.FG)
+        temp_change_property([ct_gui.spacer04], 'text', f'Added {_qty} {_item_name}', '')
+        temp_change_property([ct_gui.spacer04], 'foreground', settings.Appearance.ACTIVE, settings.Appearance.FG)
 
     def toggle_window(self) -> None:
         ''' Toggle show/hide window. '''
@@ -1286,7 +1311,7 @@ class CheatTrainer():
         ''' Display an error messagebox, and log same message to log handler. 
             Starts a thread to prevent messagebox from blocking highlight methods etc. '''
         logging.error(_msg)
-        temp_change_property([modmenu.spacer04], 'text', _msg, '')
+        temp_change_property([ct_gui.spacer04], 'text', _msg, '')
 
     @staticmethod
     def display_party_info():
@@ -1339,22 +1364,22 @@ class CheatTrainer():
 
 
 # Initialize trainer
-modmenu = CheatTrainer("FF7 Remake Trainer")
+ct_gui = CheatTrainer("FF7 Remake Trainer")
 
 
 def main():
     '''Main.'''
 
-    # Initialize the PartyMember instances AFTER modmenu, since the labels are a character attribute
+    # Initialize the PartyMember instances AFTER ct_gui, since the labels are a character attribute
     logging.debug('Initializing characters...')
     update_splash('Initializing characters...')
 
     aerith = PartyMember('Aerith',
         offsets = Offsets.Aerith,
         gui_labels = {
-            'godmode': (modmenu.aerith_godmode_label, modmenu.aerith_godmode_effect_label),
-            'inf_mp': (modmenu.aerith_inf_mp_label, modmenu.aerith_inf_mp_effect_label),
-            'inf_atb': (modmenu.aerith_inf_atb_label, modmenu.aerith_inf_atb_effect_label),
+            'godmode': (ct_gui.aerith_godmode_label, ct_gui.aerith_godmode_effect_label),
+            'inf_mp': (ct_gui.aerith_inf_mp_label, ct_gui.aerith_inf_mp_effect_label),
+            'inf_atb': (ct_gui.aerith_inf_atb_label, ct_gui.aerith_inf_atb_effect_label),
         },
     )
 
@@ -1362,19 +1387,19 @@ def main():
         offsets = Offsets.Barret,
         gui_labels = {
             # Barret labels not made yet!
-            #'godmode': (modmenu.barret_godmode_label, modmenu.barret_godmode_effect_label),
-            #'inf_mp': (modmenu.barret_inf_mp_label, modmenu.barret_inf_mp_effect_label),
-            #'inf_atb': (modmenu.barret_inf_atb_label, modmenu.barret_inf_atb_effect_label),
+            #'godmode': (ct_gui.barret_godmode_label, ct_gui.barret_godmode_effect_label),
+            #'inf_mp': (ct_gui.barret_inf_mp_label, ct_gui.barret_inf_mp_effect_label),
+            #'inf_atb': (ct_gui.barret_inf_atb_label, ct_gui.barret_inf_atb_effect_label),
         },
     )
 
     cloud = PartyMember('Cloud',
         offsets = Offsets.Cloud,
         gui_labels = {
-            'godmode': (modmenu.cloud_godmode_label, modmenu.cloud_godmode_effect_label),
-            'inf_mp': (modmenu.mp_label, modmenu.mp_effect_label),
-            'inf_atb': (modmenu.cloud_atb_label, modmenu.atb_effect_label),
-            'atk_boost': (modmenu.cloud_atk_boost_label, modmenu.cloud_atk_boost_effect_label),
+            'godmode': (ct_gui.cloud_godmode_label, ct_gui.cloud_godmode_effect_label),
+            'inf_mp': (ct_gui.mp_label, ct_gui.mp_effect_label),
+            'inf_atb': (ct_gui.cloud_atb_label, ct_gui.atb_effect_label),
+            'atk_boost': (ct_gui.cloud_atk_boost_label, ct_gui.cloud_atk_boost_effect_label),
         },
     )
 
@@ -1387,9 +1412,9 @@ def main():
         offsets = Offsets.Tifa,
         gui_labels = {
             # Tifa labels not made yet!
-            #'godmode': (modmenu.tifa_godmode_label, modmenu.tifa_godmode_effect_label),
-            #'inf_mp': (modmenu.tifa_inf_mp_label, modmenu.tifa_inf_mp_effect_label),
-            #'inf_atb': (modmenu.tifa_inf_atb_label, modmenu.tifa_inf_atb_effect_label),
+            #'godmode': (ct_gui.tifa_godmode_label, ct_gui.tifa_godmode_effect_label),
+            #'inf_mp': (ct_gui.tifa_inf_mp_label, ct_gui.tifa_inf_mp_effect_label),
+            #'inf_atb': (ct_gui.tifa_inf_atb_label, ct_gui.tifa_inf_atb_effect_label),
         },
     )
 
@@ -1397,9 +1422,9 @@ def main():
         offsets = Offsets.Yuffie,
         gui_labels = {
             # yuffie labels not made yet!
-            #'godmode': (modmenu.yuffie_godmode_label, modmenu.yuffie_godmode_effect_label),
-            #'inf_mp': (modmenu.yuffie_inf_mp_label, modmenu.yuffie_inf_mp_effect_label),
-            #'inf_atb': (modmenu.yuffie_inf_atb_label, modmenu.yuffie_inf_atb_effect_label),
+            #'godmode': (ct_gui.yuffie_godmode_label, ct_gui.yuffie_godmode_effect_label),
+            #'inf_mp': (ct_gui.yuffie_inf_mp_label, ct_gui.yuffie_inf_mp_effect_label),
+            #'inf_atb': (ct_gui.yuffie_inf_atb_label, ct_gui.yuffie_inf_atb_effect_label),
         },
     )
 
@@ -1407,9 +1432,9 @@ def main():
         offsets = Offsets.Sonon,
         gui_labels = {
             # sonon labels not made yet!
-            #'godmode': (modmenu.sonon_godmode_label, modmenu.sonon_godmode_effect_label),
-            #'inf_mp': (modmenu.sonon_inf_mp_label, modmenu.sonon_inf_mp_effect_label),
-            #'inf_atb': (modmenu.sonon_inf_atb_label, modmenu.sonon_inf_atb_effect_label),
+            #'godmode': (ct_gui.sonon_godmode_label, ct_gui.sonon_godmode_effect_label),
+            #'inf_mp': (ct_gui.sonon_inf_mp_label, ct_gui.sonon_inf_mp_effect_label),
+            #'inf_atb': (ct_gui.sonon_inf_atb_label, ct_gui.sonon_inf_atb_effect_label),
         },
     )
 
@@ -1430,21 +1455,22 @@ def main():
     keyboard.add_hotkey(settings.HOTKEYS['ALL_CHARS_INF_ATB'], PartyMember.all_toggle_inf_atb)
     keyboard.add_hotkey(settings.HOTKEYS['ALL_CHARS_INF_LIMIT'], PartyMember.all_toggle_inf_limit)
     keyboard.add_hotkey(settings.HOTKEYS['ALL_CHARS_ATK_BOOST'], PartyMember.all_toggle_atk_boost)
+    keyboard.add_hotkey(settings.HOTKEYS['ALL_CHARS_LUCK_BOOST'], PartyMember.all_toggle_luck_boost)
     # Inventory
-    keyboard.add_hotkey(settings.HOTKEYS['ADD_ITEM'], modmenu.get_item_selection)
+    keyboard.add_hotkey(settings.HOTKEYS['ADD_ITEM'], ct_gui.get_item_selection)
     # App control
-    keyboard.add_hotkey(settings.HOTKEYS['EXIT'], modmenu.win.destroy)
-    keyboard.add_hotkey(settings.HOTKEYS['HIDE_WINDOW'], modmenu.toggle_window)
+    keyboard.add_hotkey(settings.HOTKEYS['EXIT'], ct_gui.win.destroy)
+    keyboard.add_hotkey(settings.HOTKEYS['HIDE_WINDOW'], ct_gui.toggle_window)
     # Info
-    keyboard.add_hotkey(settings.HOTKEYS['SHOW_PARTY_INFO'], modmenu.display_party_info)
-    keyboard.add_hotkey(settings.HOTKEYS['SHOW_TRAINER_INFO'], modmenu.display_trainer_info)
+    keyboard.add_hotkey(settings.HOTKEYS['SHOW_PARTY_INFO'], ct_gui.display_party_info)
+    keyboard.add_hotkey(settings.HOTKEYS['SHOW_TRAINER_INFO'], ct_gui.display_trainer_info)
 
     # Kill the splash screen
     kill_splash()
 
     # Tkinter main loop (display app window)
     logging.debug('Launching tkinter loop...')
-    modmenu.win.mainloop()
+    ct_gui.win.mainloop()
 
     # Exit 0 after quitting from GUI
     logging.debug('Exiting program.')

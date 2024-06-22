@@ -73,6 +73,7 @@ HOTKEYS = {
     'ALL_CHARS_INF_ATB': 'Ctrl + Num 3',
     'ALL_CHARS_INF_LIMIT': 'Ctrl + Num 4',
     'ALL_CHARS_ATK_BOOST': 'Ctrl + Num 5',
+    'ALL_CHARS_LUCK_BOOST': 'Ctrl + Num 6',
 
     # For 'add item' widget
     'ADD_ITEM': 'Ctrl + Plus',
@@ -80,8 +81,41 @@ HOTKEYS = {
 
 ### DEBUGGING/DEVELOPMENT ###
 # Don't create process handle before initializing GUI (bool):
+# If True, enables to load GUI without game running; though any actions will result in exceptions.
 SKIP_CREATING_PROCESS_HANDLE = False
 # Log to either stdout or a file. ('file' or 'stdout')
 # If running Cython build, app will log to the file regardless of LOG_TARGET setting.
 LOG_TARGET = 'file'
 LOG_FILE = 'log.log'
+
+
+### MISC ###
+intro_msg: str = '''
+ ███████████ ███████████ ██████████                                  
+░░███░░░░░░█░░███░░░░░░█░███░░░░███                                  
+ ░███   █ ░  ░███   █ ░ ░░░    ███                                   
+ ░███████    ░███████         ███                                    
+ ░███░░░█    ░███░░░█        ███                                     
+ ░███  ░     ░███  ░        ███                                      
+ █████       █████         ███                                       
+░░░░░       ░░░░░         ░░░                                        
+ ███████████                                      █████              
+░░███░░░░░███                                    ░░███               
+ ░███    ░███   ██████  █████████████    ██████   ░███ █████  ██████ 
+ ░██████████   ███░░███░░███░░███░░███  ░░░░░███  ░███░░███  ███░░███
+ ░███░░░░░███ ░███████  ░███ ░███ ░███   ███████  ░██████░  ░███████ 
+ ░███    ░███ ░███░░░   ░███ ░███ ░███  ███░░███  ░███░░███ ░███░░░  
+ █████   █████░░██████  █████░███ █████░░████████ ████ █████░░██████ 
+░░░░░   ░░░░░  ░░░░░░  ░░░░░ ░░░ ░░░░░  ░░░░░░░░ ░░░░ ░░░░░  ░░░░░░  
+ ███████████                      ███                                
+░█░░░███░░░█                     ░░░                                 
+░   ░███  ░  ████████   ██████   ████  ████████    ██████  ████████  
+    ░███    ░░███░░███ ░░░░░███ ░░███ ░░███░░███  ███░░███░░███░░███ 
+    ░███     ░███ ░░░   ███████  ░███  ░███ ░███ ░███████  ░███ ░░░  
+    ░███     ░███      ███░░███  ░███  ░███ ░███ ░███░░░   ░███      
+    █████    █████    ░░████████ █████ ████ █████░░██████  █████     
+   ░░░░░    ░░░░░      ░░░░░░░░ ░░░░░ ░░░░ ░░░░░  ░░░░░░  ░░░░░      
+                        - by RogueAutomata -
+                   - 100% organic LLM-free code -
+                        - code@mepley.net -
+'''
