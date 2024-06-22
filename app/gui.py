@@ -591,7 +591,7 @@ class PartyMember():
                 _.config(foreground=settings.Appearance.ACTIVE)
             logging.debug('Toggled Luck Boost ON (All chars)')
 
-    def __init__(self, char_name: StringVar, offsets: dict, gui_labels: dict):
+    def __init__(self, char_name: str, offsets: dict, gui_labels: dict):
         self.char_name = char_name
         self.offsets = offsets # Dict of character's stat offsets
         self.gui_labels = gui_labels #Dict of GUI labels that apply to each stat
