@@ -4,9 +4,11 @@ __pycache__
 # environments
 .env
 .venv
-venv
-wenv
-env
+venv/
+wenv/
+env/
+env*/
+venv*/
 launch.json
 # logs
 *.log
