@@ -1334,10 +1334,11 @@ class CheatTrainer():
 
         _msg += (
             f'Controlled char: {you.controlled_character}\n'
-            f'Play time: {you.play_time}\n'
+            f'Play time: {you.play_time} ({you.play_time // 3600} hrs {(you.play_time % 3600) // 60} mins)\n'
             f'Hard mode: {you.hard_mode}\n'
             f'ATB per slot: {you.atb_per_slot}\n'
-            f'ATB rate (player): {you.player_atb_rate}\nATB rate (AI): {you.ai_atb_rate}\n'
+            f'ATB rate (player): {you.player_atb_rate}\n'
+            f'ATB rate (AI): {you.ai_atb_rate}\n'
             f'Game version: {settings.GAME_VERSION}'
         )
 
@@ -1352,7 +1353,7 @@ class CheatTrainer():
             _hk += f'{_k.title().replace("_", " ")}:    {_v.title()}\n'
 
         _help: cython.unicode = (
-            'Trainer by RogueAutomata\n\n'
+            'FF7 Remake Intergrade Trainer by RogueAutomata\n\n'
             'Source code/updates/requests:\n'
             'https://github.com/mepley1/ff7r-trainer\n\n'
             'Appearance + Hotkeys configurable in settings.py\n\n'
