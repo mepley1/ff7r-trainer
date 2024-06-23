@@ -26,7 +26,7 @@ classifiers = [
 keywords = ["cheats", "games", "final fantasy"]
 
 [project.urls]
-Repository = "https://github.com/mepley1/ff7-trainer"
+Repository = "https://github.com/mepley1/ff7r-trainer"
 Homepage = "https://mepley.net"
 
 [project.optional-dependencies]
