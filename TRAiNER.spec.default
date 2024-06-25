@@ -24,7 +24,7 @@ splash = Splash(
     '.\\assets\\splash-cleaned.jpg',
     binaries=a.binaries,
     datas=a.datas,
-    text_pos=(0, 16),
+    text_pos=(0, 20),
     text_size=12,
     text_color="#FFFFFF",
     minify_script=True,
@@ -53,5 +53,5 @@ exe = EXE(
     target_arch=None,
     codesign_identity=None,
     entitlements_file=None,
-    icon=['assets\\icon-p2.ico'],
+    icon=['assets\\icon-p2-desat.ico'],
 )
