@@ -967,7 +967,8 @@ class CheatTrainer():
         self.is_hidden: cython.bint = False #For window hiding
 
         self.win = Tk()
-        self.win.overrideredirect(True)
+        if settings.Appearance.FRAMELESS_WINDOW:
+            self.win.overrideredirect(True)
         self.win.wm_attributes("-topmost", 1)
         self.win.wm_attributes("-alpha", settings.Appearance.ALPHA)
         self.win.columnconfigure(0, weight=1)
