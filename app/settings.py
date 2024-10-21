@@ -13,6 +13,7 @@ class Appearance:
     SHOW_IMAGE = True
     HEADER_IMG_PATH = 'assets/ff7r.png'
     ALPHA = 0.8
+    FRAMELESS_WINDOW = True
 
     # Colors
     BG = '#000813'

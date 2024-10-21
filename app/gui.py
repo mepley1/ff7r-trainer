@@ -967,7 +967,8 @@ class CheatTrainer():
         self.is_hidden: cython.bint = False #For window hiding
 
         self.win = Tk()
-        self.win.overrideredirect(True)
+        if settings.Appearance.FRAMELESS_WINDOW:
+            self.win.overrideredirect(True)
         self.win.wm_attributes("-topmost", 1)
         self.win.wm_attributes("-alpha", settings.Appearance.ALPHA)
         self.win.columnconfigure(0, weight=1)
@@ -1244,12 +1245,6 @@ class CheatTrainer():
         self.spacer05 = Label(self.win).grid(column=0, row=100, columnspan=2)
 
         # Exit button
-
-        # Exit btn version 1
-        #self.exit_btn = Button(self.win, text="Exit", command=self.win.destroy)
-        #self.exit_btn.grid(column=0, row=120, sticky='wens', columnspan=2)
-
-        # New exit button
         self.exit_btn_border = Frame(self.win, background=settings.Appearance.FG)
         self.exit_btn = Button(
             self.exit_btn_border, 
@@ -1293,8 +1288,8 @@ class CheatTrainer():
 
         you.give_arbitrary_item(_item_name, _offsets, _qty)
         # Indicate success on GUI label:
-        temp_change_property([ct_gui.spacer04], 'text', f'Added {_qty} {_item_name}', '')
-        temp_change_property([ct_gui.spacer04], 'foreground', settings.Appearance.ACTIVE, settings.Appearance.FG)
+        temp_change_property([ct_gui.spacer04], 'text', f'Added {_qty} {_item_name}', '') #Set text contents
+        temp_change_property([ct_gui.spacer04], 'foreground', settings.Appearance.ACTIVE, settings.Appearance.FG) #Set FG (text) color
 
     def toggle_window(self) -> None:
         ''' Toggle show/hide window. '''
