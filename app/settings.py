@@ -8,11 +8,12 @@ GAME_VERSION = 'epic'
 
 ### APPEARANCE OPTIONS ###
 class Appearance:
+    ''' General appearance options. '''
     # Transparent background
-    TRANSPARENT_BG = False
-    SHOW_IMAGE = True
+    TRANSPARENT_BG = True
+    SHOW_IMAGE = False
     HEADER_IMG_PATH = 'assets/ff7r.png'
-    ALPHA = 0.8
+    ALPHA = 1.0
     FRAMELESS_WINDOW = True
 
     # Colors
@@ -43,7 +44,7 @@ class Appearance:
         'FONT_SIZE_TITLE': '12',
     }
 
-    # Time to display error messages/highlight labels on cheat usage.
+    # Time to display error messages/highlight labels on cheat usage (seconds).
     FEEDBACK_COOLDOWN = 2
 
 ### HOTKEYS ###

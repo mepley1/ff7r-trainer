@@ -962,6 +962,8 @@ class PartyMember():
 ### GUI
 
 class CheatTrainer():
+    ''' The main GUI window. '''
+
     def __init__(self, window_title):
 
         self.is_hidden: cython.bint = False #For window hiding
