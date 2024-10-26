@@ -84,6 +84,10 @@ Fonts + font size can be changed if desired. You must have the configured fonts 
 
 To edit hotkeys, see notes in `settings.py`.
 
+## About varying game store versions
+
+This was made with the Epic store version of FF7R Intergrade. A config option is available for Steam version as well, though I have not tested it, so it may or may not work for you. (set `GAME_VERSION` to `steam` in `settings.py`) This option will change the base addresses used when reading pointers; I've done what I can to try to make it compatible + configurable without having a copy of Steam version to test on, but no guarantees here.
+
 # Build
 
 Activate venv, then run `./build_all.bat`. It will automate building with Cython, package with pyinstaller and leave an exe in `/dist`.
