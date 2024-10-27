@@ -1,14 +1,17 @@
 # -*- mode: python ; coding: utf-8 -*-
 
-
 block_cipher = None
 
 
 a = Analysis(
     ['tmp\\launch.py'],
-    pathex=[],
+    pathex=['.\\app'],
     binaries=[],
-    datas=[('.\\assets\\ff7r.png', '.')],
+    datas=[('.\\assets\\ff7r.png', '.'),
+        #('.\\app\\gui.py', '.'),
+        #('.\\app\\settings.py', '.'),
+        #('.\\app\\offsets.py', '.'),
+    ],
     hiddenimports=[],
     hookspath=[],
     hooksconfig={},
