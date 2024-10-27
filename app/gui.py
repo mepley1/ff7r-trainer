@@ -163,8 +163,6 @@ def timed_cache(**timedelta_kwargs):
 
     def _wrapper(f):
         update_delta = timedelta(**timedelta_kwargs)
-        #next_update = datetime.utcnow() + update_delta
-        # datetime.datetime.utcnow() is deprecated.
         next_update = datetime.now() + update_delta
         # Apply @lru_cache to f with no cache size limit
         f = functools.lru_cache(None)(f)
@@ -172,7 +170,6 @@ def timed_cache(**timedelta_kwargs):
         @functools.wraps(f)
         def _wrapped(*args, **kwargs):
             nonlocal next_update
-            #now = datetime.utcnow() #datetime.datetime.utcnow() is deprecated.
             now = datetime.now()
             if now >= next_update:
                 f.cache_clear()
