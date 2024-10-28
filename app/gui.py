@@ -621,7 +621,7 @@ class PartyMember():
 
     # Max HP getter
     @property
-    @timed_cache(minutes=1)
+    @timed_cache(seconds=30)
     def max_hp(self) -> int:
         '''Return max HP.'''
         return mem.read_ushort(getPtrAddr(player_base, self.offsets['max_hp']))
@@ -634,7 +634,7 @@ class PartyMember():
 
     # Max MP getter
     @property
-    @timed_cache(minutes=1)
+    @timed_cache(seconds=30)
     def max_mp(self) -> int:
         return mem.read_ushort(getPtrAddr(player_base, self.offsets['max_mp']))
 
@@ -674,7 +674,7 @@ class PartyMember():
 
     # Luck getter
     @property
-    @timed_cache(minutes=5)
+    @timed_cache(minutes=1)
     def luck(self) -> int:
         '''Return Luck value.'''
         return mem.read_ushort(getPtrAddr(player_base, self.offsets['luck']))
