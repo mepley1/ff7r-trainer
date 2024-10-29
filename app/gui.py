@@ -42,7 +42,7 @@ else:
     logging.basicConfig(level=logging.DEBUG, filename=settings.LOG_FILE, filemode='w')
 
 # Print intro to stdout, don't spam logs with it.
-print(settings.intro_msg)
+#print(settings.intro_msg)
 
 logging.debug(f'Launch time: {datetime.now()}')
 
@@ -104,7 +104,7 @@ def read_uint(base, offsets: List[int]) -> int:
 '''
 
 # Highlight cheat label for a few seconds. (starts a thread to avoid blocking)
-def temp_highlight(labels: list, new_color=settings.Appearance.ACTIVE, normal_color=settings.Appearance.FG):
+def temp_highlight(labels: list, new_color=settings.Appearance.ACTIVE, normal_color=settings.Appearance.FG) -> None:
     """ Temporarily highlight foreground color of a widget, then return to previous color.
     Call when executing one-off cheats to indicate cheat usage """
 
@@ -119,7 +119,7 @@ def temp_highlight(labels: list, new_color=settings.Appearance.ACTIVE, normal_co
     hl_thread = Thread(target = highlight, daemon = True).start()
 
 # Highlight cheat label background for a few seconds. (starts a thread to avoid blocking)
-def temp_highlight_bg(labels: list, new_color=settings.Appearance.ACTIVE, normal_color=settings.Appearance.BG):
+def temp_highlight_bg(labels: list, new_color=settings.Appearance.ACTIVE, normal_color=settings.Appearance.BG) -> None:
     """ Temporarily highlight background color of a widget.
     Call when executing one-off cheats to indicate cheat usage """
 
@@ -152,7 +152,7 @@ def temp_change_property(labels: list, label_property, new_color: str = settings
 
 # Update cheat label's text color (permanent).
 # un-used / testing
-def update_label_color(color: str, *labels):
+def update_label_color(color: str, *labels) -> None:
     for label in labels:
         label.config(fg=color)
 
@@ -390,7 +390,7 @@ class PartyMember():
 
     # TEST ALL CHARS GODMODE LOOP
     @classmethod
-    def all_godmode_loop(cls):
+    def all_godmode_loop(cls) -> None:
         '''Godmode loop (all chars). Should be launched in a thread.'''
         logging.debug('Launching godmode loop (all characters) ...')
         while True:
@@ -402,7 +402,7 @@ class PartyMember():
 
     # All chars Inf MP loop
     @classmethod
-    def all_inf_mp_loop(cls):
+    def all_inf_mp_loop(cls) -> None:
         '''Infinite MP loop (all chars). Should be launched in a thread.'''
         logging.debug('Launching Inf MP loop (all characters) ...')
         while True:
@@ -414,7 +414,7 @@ class PartyMember():
 
     # All chars Inf ATB loop
     @classmethod
-    def all_inf_atb_loop(cls):
+    def all_inf_atb_loop(cls) -> None:
         '''Infinite ATB loop (all chars). Should be launched in a thread. Fill ATB of all characters, every n seconds. '''
         logging.debug('Launching Inf ATB loop (all characters) ...')
         while True:
@@ -426,7 +426,7 @@ class PartyMember():
 
     # All chars Inf Limit loop
     @classmethod
-    def all_inf_limit_loop(cls):
+    def all_inf_limit_loop(cls) -> None:
         '''Infinite Limit loop (all chars). Should be launched in a thread. Fills limit gauge of all characters, every n seconds. '''
         logging.debug('Launching Inf Limit loop (all characters) ...')
         while True:
@@ -438,7 +438,7 @@ class PartyMember():
 
     # All chars Atk Boost loop
     @classmethod
-    def all_atk_boost_loop(cls):
+    def all_atk_boost_loop(cls) -> None:
         '''Attack Boost loop (all chars). Write atk + magic atk values every n seconds. Should be launched in a thread.'''
         logging.debug('Launching Atk Boost loop (all characters) ...')
         while True:
@@ -450,7 +450,7 @@ class PartyMember():
 
     # All chars Luck Boost loop
     @classmethod
-    def all_luck_boost_loop(cls):
+    def all_luck_boost_loop(cls) -> None:
         '''Luck Boost loop (all chars). Write Luck value every n secs. Should be launched in a thread.'''
         logging.debug('Launching Luck Boost loop (all characters) ...')
         while True:
@@ -463,7 +463,7 @@ class PartyMember():
 
     # TEST ALL CHARS GODMODE TOGGLE
     @classmethod
-    def all_toggle_godmode(cls):
+    def all_toggle_godmode(cls) -> None:
         '''Toggle Godmode on/off - ALL CHARS.'''
         if cls.all_godmode_on == True:
             # If on, turn it off
@@ -486,7 +486,7 @@ class PartyMember():
 
     # TEST ALL CHARS Inf MP TOGGLE
     @classmethod
-    def all_toggle_inf_mp(cls):
+    def all_toggle_inf_mp(cls) -> None:
         '''Toggle Infinite MP on/off - ALL CHARS.'''
         if cls.all_inf_mp_on == True:
             # If on, turn it off
@@ -507,7 +507,7 @@ class PartyMember():
 
     # Toggle Inf ATB all chars
     @classmethod
-    def all_toggle_inf_atb(cls):
+    def all_toggle_inf_atb(cls) -> None:
         '''Toggle Infinite ATB on/off - ALL CHARS.'''
         if cls.all_inf_atb_on == True:
             # If on, turn it off
@@ -528,7 +528,7 @@ class PartyMember():
 
     # Toggle Inf Limit all chars
     @classmethod
-    def all_toggle_inf_limit(cls):
+    def all_toggle_inf_limit(cls) -> None:
         '''Toggle Infinite Limit Break on/off - ALL CHARS.'''
         if cls.all_inf_limit_on == True:
             # If on, turn it off
@@ -549,7 +549,7 @@ class PartyMember():
 
     # Toggle Atk Boost all chars
     @classmethod
-    def all_toggle_atk_boost(cls):
+    def all_toggle_atk_boost(cls) -> None:
         '''Toggle Attack Boost on/off - ALL CHARS.'''
         if cls.all_atk_boost_on == True:
             # If on, turn it off
@@ -571,7 +571,7 @@ class PartyMember():
 
     # Toggle Luck Boost all chars
     @classmethod
-    def all_toggle_luck_boost(cls):
+    def all_toggle_luck_boost(cls) -> None:
         '''Toggle Luck Boost on/off - ALL CHARS.'''
         if cls.all_luck_boost_on == True:
             # If on, turn it off
@@ -621,7 +621,7 @@ class PartyMember():
 
     # Max HP getter
     @property
-    @timed_cache(minutes=1)
+    @timed_cache(seconds=30)
     def max_hp(self) -> int:
         '''Return max HP.'''
         return mem.read_ushort(getPtrAddr(player_base, self.offsets['max_hp']))
@@ -634,7 +634,7 @@ class PartyMember():
 
     # Max MP getter
     @property
-    @timed_cache(minutes=1)
+    @timed_cache(seconds=30)
     def max_mp(self) -> int:
         return mem.read_ushort(getPtrAddr(player_base, self.offsets['max_mp']))
 
@@ -674,7 +674,7 @@ class PartyMember():
 
     # Luck getter
     @property
-    @timed_cache(minutes=5)
+    @timed_cache(minutes=1)
     def luck(self) -> int:
         '''Return Luck value.'''
         return mem.read_ushort(getPtrAddr(player_base, self.offsets['luck']))
@@ -1016,7 +1016,7 @@ class CheatTrainer():
                 self.image_label = Label(image=self.image, background=settings.Appearance.BG, height=140)
                 self.image_label.grid(column=0, row=3, sticky='news', columnspan=2)
             except:
-                logging.error(f'Couldn\'t find image file: {settings.Appearance.HEADER_IMG_PATH}')
+                logging.error(f'Image file not found: {settings.Appearance.HEADER_IMG_PATH}')
         else:
             # Create a label with similar width to keep things neat.
             self.image_label = Label(background=settings.Appearance.BG, width=38)
@@ -1262,7 +1262,8 @@ class CheatTrainer():
         self.exit_btn_border.grid(column=0, row=120, sticky='wens', columnspan=2)
         self.exit_btn.pack(expand=True, fill='both', padx=1, pady=1)
 
-    def get_item_selection(self):
+
+    def get_item_selection(self) -> None:
         ''' Callback method for "add items" menu submit. '''
         _item_name = self.selection.get()
 
@@ -1304,14 +1305,14 @@ class CheatTrainer():
             self.win.withdraw()
 
     @staticmethod
-    def log_error(_msg: str = 'Invalid input'):
-        ''' Display an error messagebox, and log same message to log handler. 
+    def log_error(_msg: str = 'Invalid input') -> None:
+        ''' Display an error in messagebox, and log same message to log handler. 
             Starts a thread to prevent messagebox from blocking highlight methods etc. '''
         logging.error(_msg)
         temp_change_property([ct_gui.spacer04], 'text', _msg, '')
 
     @staticmethod
-    def display_party_info():
+    def display_party_info() -> None:
         ''' Display current party member stats in a messagebox. '''
         _msg = 'Current party:\n\n'
 
@@ -1343,7 +1344,7 @@ class CheatTrainer():
         messagebox.showinfo('Party info', _msg)
 
     @staticmethod
-    def display_trainer_info():
+    def display_trainer_info() -> None:
         ''' Display trainer info/help in a messagebox. '''
         _hk = 'HOTKEYS:\n'
         for _k, _v in settings.HOTKEYS.items():
@@ -1365,7 +1366,7 @@ class CheatTrainer():
 ct_gui = CheatTrainer("FF7 Remake Trainer")
 
 
-def main():
+def main() -> None:
     '''Main.'''
 
     # Initialize the PartyMember instances AFTER ct_gui, since the labels are a character attribute
