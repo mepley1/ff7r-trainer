@@ -11,10 +11,15 @@ class Appearance:
     ''' General appearance options. '''
     # Transparent background
     TRANSPARENT_BG = True
+    # Show cover image on trainer, below the title
     SHOW_IMAGE = False
     HEADER_IMG_PATH = 'assets/ff7r.png'
+    # Alpha transparency of entire window. Can be glitchy if set below 1.0
     ALPHA = 1.0
+    # Show/hide window manager maximize/minimize controls (win.overrideredirect)
     FRAMELESS_WINDOW = True
+    # Enable cheats for individual characters. Otherwise only "all chars" cheats are enabled.
+    ENABLE_INDIVIDUAL_CHARS = False
 
     # Colors
     BG = '#000813'
@@ -45,7 +50,7 @@ class Appearance:
     }
 
     # Time to display error messages/highlight labels on cheat usage (seconds).
-    FEEDBACK_COOLDOWN = 2
+    FEEDBACK_COOLDOWN = 3
 
 ### HOTKEYS ###
 # Used by `keyboard` module to set hotkeys, and also displayed on GUI window.

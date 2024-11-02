@@ -1031,58 +1031,61 @@ class CheatTrainer():
 
         ## Hotkeys labels ##
 
-        # Cloud Godmode
-        self.cloud_godmode_label = Label(self.win, text=settings.HOTKEYS['CLOUD_GODMODE'])
-        self.cloud_godmode_label.grid(column=0, row=10, sticky='wns')
+        if settings.Appearance.ENABLE_INDIVIDUAL_CHARS:
+            ## Optional - Cheats for individual characters
 
-        self.cloud_godmode_effect_label = Label(self.win, text="Cloud Godmode")
-        self.cloud_godmode_effect_label.grid(column=1, row=10, sticky='wns')
+            # Cloud Godmode
+            self.cloud_godmode_label = Label(self.win, text=settings.HOTKEYS['CLOUD_GODMODE'])
+            self.cloud_godmode_label.grid(column=0, row=10, sticky='wns')
 
-        ## Cloud Inf MP button
-        self.mp_label = Label(self.win, text=settings.HOTKEYS['CLOUD_INF_MP'])
-        self.mp_label.grid(column=0, row=11, sticky='wns')
+            self.cloud_godmode_effect_label = Label(self.win, text="Cloud Godmode")
+            self.cloud_godmode_effect_label.grid(column=1, row=10, sticky='wns')
 
-        self.mp_effect_label = Label(self.win, text="Cloud Inf MP")
-        self.mp_effect_label.grid(column=1, row=11, sticky='wns')
+            ## Cloud Inf MP button
+            self.mp_label = Label(self.win, text=settings.HOTKEYS['CLOUD_INF_MP'])
+            self.mp_label.grid(column=0, row=11, sticky='wns')
 
-        # Cloud Inf ATB
-        self.cloud_atb_label = Label(self.win, text=settings.HOTKEYS['CLOUD_INF_ATB'])
-        self.cloud_atb_label.grid(column=0, row=12, sticky='wns')
+            self.mp_effect_label = Label(self.win, text="Cloud Inf MP")
+            self.mp_effect_label.grid(column=1, row=11, sticky='wns')
 
-        self.atb_effect_label = Label(self.win, text="Cloud Inf ATB")
-        self.atb_effect_label.grid(column=1, row=12, sticky='wns')
+            # Cloud Inf ATB
+            self.cloud_atb_label = Label(self.win, text=settings.HOTKEYS['CLOUD_INF_ATB'])
+            self.cloud_atb_label.grid(column=0, row=12, sticky='wns')
 
-        # Cloud Attack boost
-        self.cloud_atk_boost_label = Label(self.win, text=settings.HOTKEYS['CLOUD_ATK_BOOST'])
-        self.cloud_atk_boost_label.grid(column=0, row=13, sticky='wns')
+            self.atb_effect_label = Label(self.win, text="Cloud Inf ATB")
+            self.atb_effect_label.grid(column=1, row=12, sticky='wns')
 
-        self.cloud_atk_boost_effect_label = Label(self.win, text="Cloud Attack Boost")
-        self.cloud_atk_boost_effect_label.grid(column=1, row=13, sticky='wns')
+            # Cloud Attack boost
+            self.cloud_atk_boost_label = Label(self.win, text=settings.HOTKEYS['CLOUD_ATK_BOOST'])
+            self.cloud_atk_boost_label.grid(column=0, row=13, sticky='wns')
 
-        # Spacer
-        self.spacer01 = Label(self.win).grid(column=0, row=16, columnspan=2)
+            self.cloud_atk_boost_effect_label = Label(self.win, text="Cloud Attack Boost")
+            self.cloud_atk_boost_effect_label.grid(column=1, row=13, sticky='wns')
 
-        ### Aerith labels
-        self.aerith_godmode_label = Label(self.win, text=settings.HOTKEYS['AERITH_GODMODE'])
-        self.aerith_godmode_label.grid(column=0, row=20, sticky='wns')
+            # Spacer
+            self.spacer01 = Label(self.win).grid(column=0, row=16, columnspan=2)
 
-        self.aerith_godmode_effect_label = Label(self.win, text="Aerith Godmode")
-        self.aerith_godmode_effect_label.grid(column=1, row=20, sticky='wns')
+            ### Aerith labels
+            self.aerith_godmode_label = Label(self.win, text=settings.HOTKEYS['AERITH_GODMODE'])
+            self.aerith_godmode_label.grid(column=0, row=20, sticky='wns')
 
-        self.aerith_inf_mp_label = Label(self.win, text=settings.HOTKEYS['AERITH_INF_MP'])
-        self.aerith_inf_mp_label.grid(column=0, row=21, sticky='wns')
+            self.aerith_godmode_effect_label = Label(self.win, text="Aerith Godmode")
+            self.aerith_godmode_effect_label.grid(column=1, row=20, sticky='wns')
 
-        self.aerith_inf_mp_effect_label = Label(self.win, text="Aerith Inf MP")
-        self.aerith_inf_mp_effect_label.grid(column=1, row=21, sticky='wns')
+            self.aerith_inf_mp_label = Label(self.win, text=settings.HOTKEYS['AERITH_INF_MP'])
+            self.aerith_inf_mp_label.grid(column=0, row=21, sticky='wns')
 
-        self.aerith_inf_atb_label = Label(self.win, text=settings.HOTKEYS['AERITH_INF_ATB'])
-        self.aerith_inf_atb_label.grid(column=0, row=22, sticky='wns')
+            self.aerith_inf_mp_effect_label = Label(self.win, text="Aerith Inf MP")
+            self.aerith_inf_mp_effect_label.grid(column=1, row=21, sticky='wns')
 
-        self.aerith_inf_atb_effect_label = Label(self.win, text="Aerith Inf ATB")
-        self.aerith_inf_atb_effect_label.grid(column=1, row=22, sticky='wns')
+            self.aerith_inf_atb_label = Label(self.win, text=settings.HOTKEYS['AERITH_INF_ATB'])
+            self.aerith_inf_atb_label.grid(column=0, row=22, sticky='wns')
 
-        # Spacer
-        self.spacer02 = Label(self.win).grid(column=0, row=25, columnspan=2)
+            self.aerith_inf_atb_effect_label = Label(self.win, text="Aerith Inf ATB")
+            self.aerith_inf_atb_effect_label.grid(column=1, row=22, sticky='wns')
+
+            # Spacer
+            self.spacer02 = Label(self.win).grid(column=0, row=25, columnspan=2)
 
         ### All-characters cheats
         # godmode all
@@ -1379,7 +1382,7 @@ def main() -> None:
             'godmode': (ct_gui.aerith_godmode_label, ct_gui.aerith_godmode_effect_label),
             'inf_mp': (ct_gui.aerith_inf_mp_label, ct_gui.aerith_inf_mp_effect_label),
             'inf_atb': (ct_gui.aerith_inf_atb_label, ct_gui.aerith_inf_atb_effect_label),
-        },
+        } if settings.Appearance.ENABLE_INDIVIDUAL_CHARS else {},
     )
 
     barret = PartyMember('Barret',
@@ -1389,7 +1392,7 @@ def main() -> None:
             #'godmode': (ct_gui.barret_godmode_label, ct_gui.barret_godmode_effect_label),
             #'inf_mp': (ct_gui.barret_inf_mp_label, ct_gui.barret_inf_mp_effect_label),
             #'inf_atb': (ct_gui.barret_inf_atb_label, ct_gui.barret_inf_atb_effect_label),
-        },
+        } if settings.Appearance.ENABLE_INDIVIDUAL_CHARS else {},
     )
 
     cloud = PartyMember('Cloud',
@@ -1399,12 +1402,12 @@ def main() -> None:
             'inf_mp': (ct_gui.mp_label, ct_gui.mp_effect_label),
             'inf_atb': (ct_gui.cloud_atb_label, ct_gui.atb_effect_label),
             'atk_boost': (ct_gui.cloud_atk_boost_label, ct_gui.cloud_atk_boost_effect_label),
-        },
+        } if settings.Appearance.ENABLE_INDIVIDUAL_CHARS else {},
     )
 
     red = PartyMember('Red',
         offsets = Offsets.Red,
-        gui_labels = {},
+        gui_labels = {} if settings.Appearance.ENABLE_INDIVIDUAL_CHARS else {},
     )
 
     tifa = PartyMember('Tifa',
@@ -1414,7 +1417,7 @@ def main() -> None:
             #'godmode': (ct_gui.tifa_godmode_label, ct_gui.tifa_godmode_effect_label),
             #'inf_mp': (ct_gui.tifa_inf_mp_label, ct_gui.tifa_inf_mp_effect_label),
             #'inf_atb': (ct_gui.tifa_inf_atb_label, ct_gui.tifa_inf_atb_effect_label),
-        },
+        } if settings.Appearance.ENABLE_INDIVIDUAL_CHARS else {},
     )
 
     yuffie = PartyMember('Yuffie',
@@ -1424,7 +1427,7 @@ def main() -> None:
             #'godmode': (ct_gui.yuffie_godmode_label, ct_gui.yuffie_godmode_effect_label),
             #'inf_mp': (ct_gui.yuffie_inf_mp_label, ct_gui.yuffie_inf_mp_effect_label),
             #'inf_atb': (ct_gui.yuffie_inf_atb_label, ct_gui.yuffie_inf_atb_effect_label),
-        },
+        } if settings.Appearance.ENABLE_INDIVIDUAL_CHARS else {},
     )
 
     sonon = PartyMember('Sonon',
@@ -1434,20 +1437,22 @@ def main() -> None:
             #'godmode': (ct_gui.sonon_godmode_label, ct_gui.sonon_godmode_effect_label),
             #'inf_mp': (ct_gui.sonon_inf_mp_label, ct_gui.sonon_inf_mp_effect_label),
             #'inf_atb': (ct_gui.sonon_inf_atb_label, ct_gui.sonon_inf_atb_effect_label),
-        },
+        } if settings.Appearance.ENABLE_INDIVIDUAL_CHARS else {},
     )
 
     ### SET HOTKEYS
     logging.debug('Registering hotkeys...')
     # Cloud
-    keyboard.add_hotkey(settings.HOTKEYS['CLOUD_GODMODE'], cloud.toggle_godmode)
-    keyboard.add_hotkey(settings.HOTKEYS['CLOUD_INF_MP'], cloud.toggle_inf_mp)
-    keyboard.add_hotkey(settings.HOTKEYS['CLOUD_INF_ATB'], cloud.toggle_inf_atb)
-    keyboard.add_hotkey(settings.HOTKEYS['CLOUD_ATK_BOOST'], cloud.toggle_atk_boost)
+    if settings.Appearance.ENABLE_INDIVIDUAL_CHARS:
+        keyboard.add_hotkey(settings.HOTKEYS['CLOUD_GODMODE'], cloud.toggle_godmode)
+        keyboard.add_hotkey(settings.HOTKEYS['CLOUD_INF_MP'], cloud.toggle_inf_mp)
+        keyboard.add_hotkey(settings.HOTKEYS['CLOUD_INF_ATB'], cloud.toggle_inf_atb)
+        keyboard.add_hotkey(settings.HOTKEYS['CLOUD_ATK_BOOST'], cloud.toggle_atk_boost)
     # Aerith
-    keyboard.add_hotkey(settings.HOTKEYS['AERITH_GODMODE'], aerith.toggle_godmode)
-    keyboard.add_hotkey(settings.HOTKEYS['AERITH_INF_MP'], aerith.toggle_inf_mp)
-    keyboard.add_hotkey(settings.HOTKEYS['AERITH_INF_ATB'], aerith.toggle_inf_atb)
+    if settings.Appearance.ENABLE_INDIVIDUAL_CHARS:
+        keyboard.add_hotkey(settings.HOTKEYS['AERITH_GODMODE'], aerith.toggle_godmode)
+        keyboard.add_hotkey(settings.HOTKEYS['AERITH_INF_MP'], aerith.toggle_inf_mp)
+        keyboard.add_hotkey(settings.HOTKEYS['AERITH_INF_ATB'], aerith.toggle_inf_atb)
     # All characters
     keyboard.add_hotkey(settings.HOTKEYS['ALL_CHARS_GODMODE'], PartyMember.all_toggle_godmode)
     keyboard.add_hotkey(settings.HOTKEYS['ALL_CHARS_INF_MP'], PartyMember.all_toggle_inf_mp)
