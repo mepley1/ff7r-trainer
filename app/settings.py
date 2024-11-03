@@ -10,16 +10,16 @@ GAME_VERSION = 'epic'
 class Appearance:
     ''' General appearance options. '''
     # Transparent background
-    TRANSPARENT_BG = True
+    TRANSPARENT_BG = False
     # Show cover image on trainer, below the title
-    SHOW_IMAGE = False
+    SHOW_IMAGE = True
     HEADER_IMG_PATH = 'assets/ff7r.png'
     # Alpha transparency of entire window. Can be glitchy if set below 1.0
     ALPHA = 1.0
     # Show/hide window manager maximize/minimize controls (win.overrideredirect)
     FRAMELESS_WINDOW = True
     # Enable cheats for individual characters. Otherwise only "all chars" cheats are enabled.
-    ENABLE_INDIVIDUAL_CHARS = False
+    ENABLE_INDIVIDUAL_CHARS = True
 
     # Colors
     BG = '#000813'
@@ -50,7 +50,7 @@ class Appearance:
     }
 
     # Time to display error messages/highlight labels on cheat usage (seconds).
-    FEEDBACK_COOLDOWN = 3
+    FEEDBACK_COOLDOWN = 2
 
 ### HOTKEYS ###
 # Used by `keyboard` module to set hotkeys, and also displayed on GUI window.
@@ -81,6 +81,9 @@ HOTKEYS = {
     'ALL_CHARS_INF_LIMIT': 'Ctrl + Num 4',
     'ALL_CHARS_ATK_BOOST': 'Ctrl + Num 5',
     'ALL_CHARS_LUCK_BOOST': 'Ctrl + Num 6',
+
+    'HARDMODE_AP_MULTIPLIER': 'Ctrl + Num 8',
+    'HARDMODE_EXP_MULTIPLIER': 'Ctrl + Num 9',
 
     # For 'add item' widget
     'ADD_ITEM': 'Ctrl + Plus',
