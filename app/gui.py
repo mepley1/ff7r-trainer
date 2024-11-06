@@ -1,5 +1,6 @@
 """ Main app module, contains GUI and logic. """
 
+import contextlib #For ap multiplier context manager
 import cython
 import functools
 import keyboard
@@ -184,7 +185,11 @@ class Player():
     directly related to individual characters. '''
 
     def __init__(self, offsets: dict):
+        # See offsets.py for offsets
         self.offsets = offsets
+        # Flags for toggling meta cheats
+        self.hard_mode_ap_multiplier_on: cython.bint = False
+        self.hard_mode_exp_multiplier_on: cython.bint = False
 
     @property
     @timed_cache(minutes=1)
@@ -215,16 +220,16 @@ class Player():
         return _
 
     @property
-    @timed_cache(minutes=1)
+    #@timed_cache(minutes=1)
     def hard_mode_exp_multiplier(self) -> int:
-        '''Hard mode experience multiplier. (Getter)'''
+        '''Hard mode experience multiplier. (Getter) Default=200.'''
         _: cython.uint = mem.read_uint(getPtrAddr(data_base, self.offsets['hard_mode_exp_multiplier']))
         return _
 
     @property
-    @timed_cache(minutes=1)
+    #@timed_cache(minutes=1)
     def hard_mode_ap_multiplier(self) -> int:
-        '''Hard mode AP multiplier. (Getter)'''
+        '''Hard mode AP multiplier. (Getter) Default=300.'''
         _: cython.uint = mem.read_uint(getPtrAddr(data_base, self.offsets['hard_mode_ap_multiplier']))
         return _
 
@@ -274,14 +279,36 @@ class Player():
     # Hardmode EXP mult setter (uint 4bytes)
     @hard_mode_exp_multiplier.setter
     def hard_mode_exp_multiplier(self, _target) -> None:
-        ''' Hardmode experience multiplier (Setter). '''
+        ''' Hardmode experience multiplier (Setter). Default=200 '''
         mem.write_uint(getPtrAddr(data_base, self.offsets['hard_mode_exp_multiplier']), _target)
 
     # Hardmode AP mult setter (4bytes uint)
     @hard_mode_ap_multiplier.setter
     def hard_mode_ap_multiplier(self, _target) -> None:
-        ''' Hardmode AP multiplier (Setter). '''
+        ''' Hardmode AP multiplier (Setter). Default=300 '''
         mem.write_uint(getPtrAddr(data_base, self.offsets['hard_mode_ap_multiplier']), _target)
+
+    """
+    # context manager for AP mult - ensure value gets set back to default in case of crash/reload game
+    # Not used.
+    @contextlib.contextmanager
+    def reset_ap_multiplier(self, _default_value):
+        try:
+            yield
+        finally:
+            self.hard_mode_ap_multiplier = _default_value
+
+    # Test: context manager for arbitrary property
+    # Not used yet.
+    @contextlib.contextmanager
+    def reset_property(self, _property, _default_value):
+        try:
+            yield
+        finally:
+            _property = _default_value
+    """
+
+    ## CHEATS - META
 
     @staticmethod
     def give_arbitrary_item(_item_name: cython.unicode, _item_offsets: List[int], _num: cython.uint = 1) -> None:
@@ -293,12 +320,81 @@ class Player():
         '''
         _current_inv: cython.uint = mem.read_uint(getPtrAddr(player_base, _item_offsets))
         #_num = int(_num)
-        # Don't write >99 of an item, except for Gil
+        # Don't write >99 of any item, except for Gil
         _new_qty: cython.uint = min(_current_inv + _num, 99) if not _item_offsets == Offsets.item_offsets['Gil'] else _current_inv + _num
 
         _msg = f'Current qty: {_current_inv} {_item_name}; adding {_num}. New qty: {_new_qty}'
         logging.debug(_msg)
         mem.write_uint(getPtrAddr(player_base, _item_offsets), _new_qty)
+
+    def toggle_hard_mode_ap_multiplier(self) -> None:
+        '''Boost hardmode AP multiplier (20x), for quick leveling of materia.
+        Toggle cheat by setting a variable (hard_mode_ap_multiplier_on = True/False) -
+        i.e. no event+daemon like the character cheats use.
+        Game will overwrite value eventually.'''
+        _default_mult: cython.uint = 300
+        _cheat_mult: cython.uint = 6000
+        logging.debug(f'Current hardmode AP mult: {self.hard_mode_ap_multiplier}.')
+
+        # Check for hardmode first. If not hardmode then do nothing.
+        if self.hard_mode: 
+            # If ON, turn OFF
+            if self.hard_mode_ap_multiplier_on == True or self.hard_mode_ap_multiplier == _cheat_mult:
+                self.hard_mode_ap_multiplier_on = False
+                self.hard_mode_ap_multiplier = _default_mult
+                # Update GUI
+                for _ in (ct_gui.hardmode_ap_multiplier_label, ct_gui.hardmode_ap_multiplier_effect_label):
+                    _.config(foreground=settings.Appearance.FG)
+                logging.debug(f'AP Multiplier boost OFF. Reset to {_default_mult}')
+            # If OFF, turn ON
+            elif self.hard_mode_ap_multiplier_on == False:
+                self.hard_mode_ap_multiplier_on = True
+                self.hard_mode_ap_multiplier = _cheat_mult
+                # Update GUI
+                for _ in (ct_gui.hardmode_ap_multiplier_label, ct_gui.hardmode_ap_multiplier_effect_label):
+                    _.config(foreground=settings.Appearance.ACTIVE)
+                logging.debug('AP Multiplier boost ON')
+        else:
+            logging.warning('Not playing Hard Mode! Skipping AP mult cheat.')
+            ct_gui.log_error('Not playing Hard Mode!') #Display message on trainer
+            # In case it gets left at cheat value when reloading etc, go ahead and check+reset
+            if self.hard_mode_ap_multiplier == _cheat_mult:
+                self.hard_mode_ap_multiplier = _default_mult
+
+    def toggle_hard_mode_exp_multiplier(self) -> None:
+        '''Boost hardmode EXP multiplier (x20), for quick leveling of characters.
+        Toggle cheat by simply setting an instance variable - no event flag like characters cheats use.
+        Game doesn't overwrite EXP mult as quickly as AP - ensure it gets reset if crash/reload;
+        try using a context manager.'''
+        _default_mult: cython.uint = 200
+        _cheat_mult: cython.uint = 4000
+        logging.debug(f'Current hardmode EXP multiplier: {self.hard_mode_exp_multiplier}.')
+
+        # Check for hardmode first.
+        if self.hard_mode:
+            # If cheat ON, turn OFF
+            if self.hard_mode_exp_multiplier_on == True or self.hard_mode_exp_multiplier == _cheat_mult:
+                self.hard_mode_exp_multiplier_on = False
+                self.hard_mode_exp_multiplier = _default_mult
+                # Update GUI
+                for _ in (ct_gui.hardmode_exp_multiplier_label, ct_gui.hardmode_exp_multiplier_effect_label):
+                    _.config(foreground=settings.Appearance.FG)
+                logging.debug(f'EXP Multiplier boost OFF. Reset to {_default_mult}')
+            # If OFF, turn ON
+            elif self.hard_mode_exp_multiplier_on == False:
+                self.hard_mode_exp_multiplier_on = True
+                self.hard_mode_exp_multiplier = _cheat_mult
+                # Update GUI
+                for _ in (ct_gui.hardmode_exp_multiplier_label, ct_gui.hardmode_exp_multiplier_effect_label):
+                    _.config(foreground=settings.Appearance.ACTIVE)
+                logging.debug('EXP Multiplier boost ON')
+        else:
+            #If not hard mode, don't do anything.
+            logging.warning('Not playing Hard Mode! Skipping EXP mult cheat.')
+            ct_gui.log_error('Not playing Hard Mode!') #Display message on trainer
+            # In case it gets left at cheat value when reloading etc, go ahead and check+reset
+            if self.hard_mode_exp_multiplier == _cheat_mult:
+                self.hard_mode_exp_multiplier = _default_mult
 
 # It's YOU, get it?
 you = Player(
@@ -1130,6 +1226,20 @@ class CheatTrainer():
         self.all_chars_luck_boost_effect_label = Label(self.win, text="All Luck Boost")
         self.all_chars_luck_boost_effect_label.grid(column=1, row=55, sticky='wns')
 
+        # Hard mode AP multiplier
+        self.hardmode_ap_multiplier_label = Label(self.win, text=settings.HOTKEYS['HARDMODE_AP_MULTIPLIER'])
+        self.hardmode_ap_multiplier_label.grid(column=0, row=56, sticky='wns')
+
+        self.hardmode_ap_multiplier_effect_label = Label(self.win, text="Hardmode AP Multiplier")
+        self.hardmode_ap_multiplier_effect_label.grid(column=1, row=56, sticky='wns')
+
+        # Hard mode EXP multiplier
+        self.hardmode_exp_multiplier_label = Label(self.win, text=settings.HOTKEYS['HARDMODE_EXP_MULTIPLIER'])
+        self.hardmode_exp_multiplier_label.grid(column=0, row=57, sticky='wns')
+
+        self.hardmode_exp_multiplier_effect_label = Label(self.win, text="Hardmode EXP Multiplier")
+        self.hardmode_exp_multiplier_effect_label.grid(column=1, row=57, sticky='wns')
+
         # Spacer
         self.spacer03 = Label(self.win).grid(column=0, row=59, columnspan=2)
 
@@ -1460,6 +1570,9 @@ def main() -> None:
     keyboard.add_hotkey(settings.HOTKEYS['ALL_CHARS_INF_LIMIT'], PartyMember.all_toggle_inf_limit)
     keyboard.add_hotkey(settings.HOTKEYS['ALL_CHARS_ATK_BOOST'], PartyMember.all_toggle_atk_boost)
     keyboard.add_hotkey(settings.HOTKEYS['ALL_CHARS_LUCK_BOOST'], PartyMember.all_toggle_luck_boost)
+    # Meta
+    keyboard.add_hotkey(settings.HOTKEYS['HARDMODE_AP_MULTIPLIER'], you.toggle_hard_mode_ap_multiplier)
+    keyboard.add_hotkey(settings.HOTKEYS['HARDMODE_EXP_MULTIPLIER'], you.toggle_hard_mode_exp_multiplier)
     # Inventory
     keyboard.add_hotkey(settings.HOTKEYS['ADD_ITEM'], ct_gui.get_item_selection)
     # App control
