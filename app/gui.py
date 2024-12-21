@@ -1,5 +1,6 @@
 """ Main app module, contains GUI and logic. """
 
+import contextlib #For ap multiplier context manager
 import cython
 import functools
 import keyboard
@@ -184,7 +185,11 @@ class Player():
     directly related to individual characters. '''
 
     def __init__(self, offsets: dict):
+        # See offsets.py for offsets
         self.offsets = offsets
+        # Flags for toggling meta cheats
+        self.hard_mode_ap_multiplier_on: cython.bint = False
+        self.hard_mode_exp_multiplier_on: cython.bint = False
 
     @property
     @timed_cache(minutes=1)
@@ -215,16 +220,16 @@ class Player():
         return _
 
     @property
-    @timed_cache(minutes=1)
+    #@timed_cache(minutes=1)
     def hard_mode_exp_multiplier(self) -> int:
-        '''Hard mode experience multiplier. (Getter)'''
+        '''Hard mode experience multiplier. (Getter) Default=200.'''
         _: cython.uint = mem.read_uint(getPtrAddr(data_base, self.offsets['hard_mode_exp_multiplier']))
         return _
 
     @property
-    @timed_cache(minutes=1)
+    #@timed_cache(minutes=1)
     def hard_mode_ap_multiplier(self) -> int:
-        '''Hard mode AP multiplier. (Getter)'''
+        '''Hard mode AP multiplier. (Getter) Default=300.'''
         _: cython.uint = mem.read_uint(getPtrAddr(data_base, self.offsets['hard_mode_ap_multiplier']))
         return _
 
@@ -274,14 +279,36 @@ class Player():
     # Hardmode EXP mult setter (uint 4bytes)
     @hard_mode_exp_multiplier.setter
     def hard_mode_exp_multiplier(self, _target) -> None:
-        ''' Hardmode experience multiplier (Setter). '''
+        ''' Hardmode experience multiplier (Setter). Default=200 '''
         mem.write_uint(getPtrAddr(data_base, self.offsets['hard_mode_exp_multiplier']), _target)
 
     # Hardmode AP mult setter (4bytes uint)
     @hard_mode_ap_multiplier.setter
     def hard_mode_ap_multiplier(self, _target) -> None:
-        ''' Hardmode AP multiplier (Setter). '''
+        ''' Hardmode AP multiplier (Setter). Default=300 '''
         mem.write_uint(getPtrAddr(data_base, self.offsets['hard_mode_ap_multiplier']), _target)
+
+    """
+    # context manager for AP mult - ensure value gets set back to default in case of crash/reload game
+    # Not used.
+    @contextlib.contextmanager
+    def reset_ap_multiplier(self, _default_value):
+        try:
+            yield
+        finally:
+            self.hard_mode_ap_multiplier = _default_value
+
+    # Test: context manager for arbitrary property
+    # Not used yet.
+    @contextlib.contextmanager
+    def reset_property(self, _property, _default_value):
+        try:
+            yield
+        finally:
+            _property = _default_value
+    """
+
+    ## CHEATS - META
 
     @staticmethod
     def give_arbitrary_item(_item_name: cython.unicode, _item_offsets: List[int], _num: cython.uint = 1) -> None:
@@ -293,12 +320,81 @@ class Player():
         '''
         _current_inv: cython.uint = mem.read_uint(getPtrAddr(player_base, _item_offsets))
         #_num = int(_num)
-        # Don't write >99 of an item, except for Gil
+        # Don't write >99 of any item, except for Gil
         _new_qty: cython.uint = min(_current_inv + _num, 99) if not _item_offsets == Offsets.item_offsets['Gil'] else _current_inv + _num
 
         _msg = f'Current qty: {_current_inv} {_item_name}; adding {_num}. New qty: {_new_qty}'
         logging.debug(_msg)
         mem.write_uint(getPtrAddr(player_base, _item_offsets), _new_qty)
+
+    def toggle_hard_mode_ap_multiplier(self) -> None:
+        '''Boost hardmode AP multiplier (20x), for quick leveling of materia.
+        Toggle cheat by setting a variable (hard_mode_ap_multiplier_on = True/False) -
+        i.e. no event+daemon like the character cheats use.
+        Game will overwrite value eventually.'''
+        _default_mult: cython.uint = 300
+        _cheat_mult: cython.uint = 6000
+        logging.debug(f'Current hardmode AP mult: {self.hard_mode_ap_multiplier}.')
+
+        # Check for hardmode first. If not hardmode then do nothing.
+        if self.hard_mode: 
+            # If ON, turn OFF
+            if self.hard_mode_ap_multiplier_on == True or self.hard_mode_ap_multiplier == _cheat_mult:
+                self.hard_mode_ap_multiplier_on = False
+                self.hard_mode_ap_multiplier = _default_mult
+                # Update GUI
+                for _ in (ct_gui.hardmode_ap_multiplier_label, ct_gui.hardmode_ap_multiplier_effect_label):
+                    _.config(foreground=settings.Appearance.FG)
+                logging.debug(f'AP Multiplier boost OFF. Reset to {_default_mult}')
+            # If OFF, turn ON
+            elif self.hard_mode_ap_multiplier_on == False:
+                self.hard_mode_ap_multiplier_on = True
+                self.hard_mode_ap_multiplier = _cheat_mult
+                # Update GUI
+                for _ in (ct_gui.hardmode_ap_multiplier_label, ct_gui.hardmode_ap_multiplier_effect_label):
+                    _.config(foreground=settings.Appearance.ACTIVE)
+                logging.debug('AP Multiplier boost ON')
+        else:
+            logging.warning('Not playing Hard Mode! Skipping AP mult cheat.')
+            ct_gui.log_error('Not playing Hard Mode!') #Display message on trainer
+            # In case it gets left at cheat value when reloading etc, go ahead and check+reset
+            if self.hard_mode_ap_multiplier == _cheat_mult:
+                self.hard_mode_ap_multiplier = _default_mult
+
+    def toggle_hard_mode_exp_multiplier(self) -> None:
+        '''Boost hardmode EXP multiplier (x20), for quick leveling of characters.
+        Toggle cheat by simply setting an instance variable - no event flag like characters cheats use.
+        Game doesn't overwrite EXP mult as quickly as AP - ensure it gets reset if crash/reload;
+        try using a context manager.'''
+        _default_mult: cython.uint = 200
+        _cheat_mult: cython.uint = 4000
+        logging.debug(f'Current hardmode EXP multiplier: {self.hard_mode_exp_multiplier}.')
+
+        # Check for hardmode first.
+        if self.hard_mode:
+            # If cheat ON, turn OFF
+            if self.hard_mode_exp_multiplier_on == True or self.hard_mode_exp_multiplier == _cheat_mult:
+                self.hard_mode_exp_multiplier_on = False
+                self.hard_mode_exp_multiplier = _default_mult
+                # Update GUI
+                for _ in (ct_gui.hardmode_exp_multiplier_label, ct_gui.hardmode_exp_multiplier_effect_label):
+                    _.config(foreground=settings.Appearance.FG)
+                logging.debug(f'EXP Multiplier boost OFF. Reset to {_default_mult}')
+            # If OFF, turn ON
+            elif self.hard_mode_exp_multiplier_on == False:
+                self.hard_mode_exp_multiplier_on = True
+                self.hard_mode_exp_multiplier = _cheat_mult
+                # Update GUI
+                for _ in (ct_gui.hardmode_exp_multiplier_label, ct_gui.hardmode_exp_multiplier_effect_label):
+                    _.config(foreground=settings.Appearance.ACTIVE)
+                logging.debug('EXP Multiplier boost ON')
+        else:
+            #If not hard mode, don't do anything.
+            logging.warning('Not playing Hard Mode! Skipping EXP mult cheat.')
+            ct_gui.log_error('Not playing Hard Mode!') #Display message on trainer
+            # In case it gets left at cheat value when reloading etc, go ahead and check+reset
+            if self.hard_mode_exp_multiplier == _cheat_mult:
+                self.hard_mode_exp_multiplier = _default_mult
 
 # It's YOU, get it?
 you = Player(
@@ -1031,58 +1127,61 @@ class CheatTrainer():
 
         ## Hotkeys labels ##
 
-        # Cloud Godmode
-        self.cloud_godmode_label = Label(self.win, text=settings.HOTKEYS['CLOUD_GODMODE'])
-        self.cloud_godmode_label.grid(column=0, row=10, sticky='wns')
+        if settings.Appearance.ENABLE_INDIVIDUAL_CHARS:
+            ## Optional - Cheats for individual characters
 
-        self.cloud_godmode_effect_label = Label(self.win, text="Cloud Godmode")
-        self.cloud_godmode_effect_label.grid(column=1, row=10, sticky='wns')
+            # Cloud Godmode
+            self.cloud_godmode_label = Label(self.win, text=settings.HOTKEYS['CLOUD_GODMODE'])
+            self.cloud_godmode_label.grid(column=0, row=10, sticky='wns')
 
-        ## Cloud Inf MP button
-        self.mp_label = Label(self.win, text=settings.HOTKEYS['CLOUD_INF_MP'])
-        self.mp_label.grid(column=0, row=11, sticky='wns')
+            self.cloud_godmode_effect_label = Label(self.win, text="Cloud Godmode")
+            self.cloud_godmode_effect_label.grid(column=1, row=10, sticky='wns')
 
-        self.mp_effect_label = Label(self.win, text="Cloud Inf MP")
-        self.mp_effect_label.grid(column=1, row=11, sticky='wns')
+            ## Cloud Inf MP button
+            self.mp_label = Label(self.win, text=settings.HOTKEYS['CLOUD_INF_MP'])
+            self.mp_label.grid(column=0, row=11, sticky='wns')
 
-        # Cloud Inf ATB
-        self.cloud_atb_label = Label(self.win, text=settings.HOTKEYS['CLOUD_INF_ATB'])
-        self.cloud_atb_label.grid(column=0, row=12, sticky='wns')
+            self.mp_effect_label = Label(self.win, text="Cloud Inf MP")
+            self.mp_effect_label.grid(column=1, row=11, sticky='wns')
 
-        self.atb_effect_label = Label(self.win, text="Cloud Inf ATB")
-        self.atb_effect_label.grid(column=1, row=12, sticky='wns')
+            # Cloud Inf ATB
+            self.cloud_atb_label = Label(self.win, text=settings.HOTKEYS['CLOUD_INF_ATB'])
+            self.cloud_atb_label.grid(column=0, row=12, sticky='wns')
 
-        # Cloud Attack boost
-        self.cloud_atk_boost_label = Label(self.win, text=settings.HOTKEYS['CLOUD_ATK_BOOST'])
-        self.cloud_atk_boost_label.grid(column=0, row=13, sticky='wns')
+            self.atb_effect_label = Label(self.win, text="Cloud Inf ATB")
+            self.atb_effect_label.grid(column=1, row=12, sticky='wns')
 
-        self.cloud_atk_boost_effect_label = Label(self.win, text="Cloud Attack Boost")
-        self.cloud_atk_boost_effect_label.grid(column=1, row=13, sticky='wns')
+            # Cloud Attack boost
+            self.cloud_atk_boost_label = Label(self.win, text=settings.HOTKEYS['CLOUD_ATK_BOOST'])
+            self.cloud_atk_boost_label.grid(column=0, row=13, sticky='wns')
 
-        # Spacer
-        self.spacer01 = Label(self.win).grid(column=0, row=16, columnspan=2)
+            self.cloud_atk_boost_effect_label = Label(self.win, text="Cloud Attack Boost")
+            self.cloud_atk_boost_effect_label.grid(column=1, row=13, sticky='wns')
 
-        ### Aerith labels
-        self.aerith_godmode_label = Label(self.win, text=settings.HOTKEYS['AERITH_GODMODE'])
-        self.aerith_godmode_label.grid(column=0, row=20, sticky='wns')
+            # Spacer
+            self.spacer01 = Label(self.win).grid(column=0, row=16, columnspan=2)
 
-        self.aerith_godmode_effect_label = Label(self.win, text="Aerith Godmode")
-        self.aerith_godmode_effect_label.grid(column=1, row=20, sticky='wns')
+            ### Aerith labels
+            self.aerith_godmode_label = Label(self.win, text=settings.HOTKEYS['AERITH_GODMODE'])
+            self.aerith_godmode_label.grid(column=0, row=20, sticky='wns')
 
-        self.aerith_inf_mp_label = Label(self.win, text=settings.HOTKEYS['AERITH_INF_MP'])
-        self.aerith_inf_mp_label.grid(column=0, row=21, sticky='wns')
+            self.aerith_godmode_effect_label = Label(self.win, text="Aerith Godmode")
+            self.aerith_godmode_effect_label.grid(column=1, row=20, sticky='wns')
 
-        self.aerith_inf_mp_effect_label = Label(self.win, text="Aerith Inf MP")
-        self.aerith_inf_mp_effect_label.grid(column=1, row=21, sticky='wns')
+            self.aerith_inf_mp_label = Label(self.win, text=settings.HOTKEYS['AERITH_INF_MP'])
+            self.aerith_inf_mp_label.grid(column=0, row=21, sticky='wns')
 
-        self.aerith_inf_atb_label = Label(self.win, text=settings.HOTKEYS['AERITH_INF_ATB'])
-        self.aerith_inf_atb_label.grid(column=0, row=22, sticky='wns')
+            self.aerith_inf_mp_effect_label = Label(self.win, text="Aerith Inf MP")
+            self.aerith_inf_mp_effect_label.grid(column=1, row=21, sticky='wns')
 
-        self.aerith_inf_atb_effect_label = Label(self.win, text="Aerith Inf ATB")
-        self.aerith_inf_atb_effect_label.grid(column=1, row=22, sticky='wns')
+            self.aerith_inf_atb_label = Label(self.win, text=settings.HOTKEYS['AERITH_INF_ATB'])
+            self.aerith_inf_atb_label.grid(column=0, row=22, sticky='wns')
 
-        # Spacer
-        self.spacer02 = Label(self.win).grid(column=0, row=25, columnspan=2)
+            self.aerith_inf_atb_effect_label = Label(self.win, text="Aerith Inf ATB")
+            self.aerith_inf_atb_effect_label.grid(column=1, row=22, sticky='wns')
+
+            # Spacer
+            self.spacer02 = Label(self.win).grid(column=0, row=25, columnspan=2)
 
         ### All-characters cheats
         # godmode all
@@ -1126,6 +1225,20 @@ class CheatTrainer():
 
         self.all_chars_luck_boost_effect_label = Label(self.win, text="All Luck Boost")
         self.all_chars_luck_boost_effect_label.grid(column=1, row=55, sticky='wns')
+
+        # Hard mode AP multiplier
+        self.hardmode_ap_multiplier_label = Label(self.win, text=settings.HOTKEYS['HARDMODE_AP_MULTIPLIER'])
+        self.hardmode_ap_multiplier_label.grid(column=0, row=56, sticky='wns')
+
+        self.hardmode_ap_multiplier_effect_label = Label(self.win, text="Hardmode AP Multiplier")
+        self.hardmode_ap_multiplier_effect_label.grid(column=1, row=56, sticky='wns')
+
+        # Hard mode EXP multiplier
+        self.hardmode_exp_multiplier_label = Label(self.win, text=settings.HOTKEYS['HARDMODE_EXP_MULTIPLIER'])
+        self.hardmode_exp_multiplier_label.grid(column=0, row=57, sticky='wns')
+
+        self.hardmode_exp_multiplier_effect_label = Label(self.win, text="Hardmode EXP Multiplier")
+        self.hardmode_exp_multiplier_effect_label.grid(column=1, row=57, sticky='wns')
 
         # Spacer
         self.spacer03 = Label(self.win).grid(column=0, row=59, columnspan=2)
@@ -1379,7 +1492,7 @@ def main() -> None:
             'godmode': (ct_gui.aerith_godmode_label, ct_gui.aerith_godmode_effect_label),
             'inf_mp': (ct_gui.aerith_inf_mp_label, ct_gui.aerith_inf_mp_effect_label),
             'inf_atb': (ct_gui.aerith_inf_atb_label, ct_gui.aerith_inf_atb_effect_label),
-        },
+        } if settings.Appearance.ENABLE_INDIVIDUAL_CHARS else {},
     )
 
     barret = PartyMember('Barret',
@@ -1389,7 +1502,7 @@ def main() -> None:
             #'godmode': (ct_gui.barret_godmode_label, ct_gui.barret_godmode_effect_label),
             #'inf_mp': (ct_gui.barret_inf_mp_label, ct_gui.barret_inf_mp_effect_label),
             #'inf_atb': (ct_gui.barret_inf_atb_label, ct_gui.barret_inf_atb_effect_label),
-        },
+        } if settings.Appearance.ENABLE_INDIVIDUAL_CHARS else {},
     )
 
     cloud = PartyMember('Cloud',
@@ -1399,12 +1512,12 @@ def main() -> None:
             'inf_mp': (ct_gui.mp_label, ct_gui.mp_effect_label),
             'inf_atb': (ct_gui.cloud_atb_label, ct_gui.atb_effect_label),
             'atk_boost': (ct_gui.cloud_atk_boost_label, ct_gui.cloud_atk_boost_effect_label),
-        },
+        } if settings.Appearance.ENABLE_INDIVIDUAL_CHARS else {},
     )
 
     red = PartyMember('Red',
         offsets = Offsets.Red,
-        gui_labels = {},
+        gui_labels = {} if settings.Appearance.ENABLE_INDIVIDUAL_CHARS else {},
     )
 
     tifa = PartyMember('Tifa',
@@ -1414,7 +1527,7 @@ def main() -> None:
             #'godmode': (ct_gui.tifa_godmode_label, ct_gui.tifa_godmode_effect_label),
             #'inf_mp': (ct_gui.tifa_inf_mp_label, ct_gui.tifa_inf_mp_effect_label),
             #'inf_atb': (ct_gui.tifa_inf_atb_label, ct_gui.tifa_inf_atb_effect_label),
-        },
+        } if settings.Appearance.ENABLE_INDIVIDUAL_CHARS else {},
     )
 
     yuffie = PartyMember('Yuffie',
@@ -1424,7 +1537,7 @@ def main() -> None:
             #'godmode': (ct_gui.yuffie_godmode_label, ct_gui.yuffie_godmode_effect_label),
             #'inf_mp': (ct_gui.yuffie_inf_mp_label, ct_gui.yuffie_inf_mp_effect_label),
             #'inf_atb': (ct_gui.yuffie_inf_atb_label, ct_gui.yuffie_inf_atb_effect_label),
-        },
+        } if settings.Appearance.ENABLE_INDIVIDUAL_CHARS else {},
     )
 
     sonon = PartyMember('Sonon',
@@ -1434,20 +1547,22 @@ def main() -> None:
             #'godmode': (ct_gui.sonon_godmode_label, ct_gui.sonon_godmode_effect_label),
             #'inf_mp': (ct_gui.sonon_inf_mp_label, ct_gui.sonon_inf_mp_effect_label),
             #'inf_atb': (ct_gui.sonon_inf_atb_label, ct_gui.sonon_inf_atb_effect_label),
-        },
+        } if settings.Appearance.ENABLE_INDIVIDUAL_CHARS else {},
     )
 
     ### SET HOTKEYS
     logging.debug('Registering hotkeys...')
     # Cloud
-    keyboard.add_hotkey(settings.HOTKEYS['CLOUD_GODMODE'], cloud.toggle_godmode)
-    keyboard.add_hotkey(settings.HOTKEYS['CLOUD_INF_MP'], cloud.toggle_inf_mp)
-    keyboard.add_hotkey(settings.HOTKEYS['CLOUD_INF_ATB'], cloud.toggle_inf_atb)
-    keyboard.add_hotkey(settings.HOTKEYS['CLOUD_ATK_BOOST'], cloud.toggle_atk_boost)
+    if settings.Appearance.ENABLE_INDIVIDUAL_CHARS:
+        keyboard.add_hotkey(settings.HOTKEYS['CLOUD_GODMODE'], cloud.toggle_godmode)
+        keyboard.add_hotkey(settings.HOTKEYS['CLOUD_INF_MP'], cloud.toggle_inf_mp)
+        keyboard.add_hotkey(settings.HOTKEYS['CLOUD_INF_ATB'], cloud.toggle_inf_atb)
+        keyboard.add_hotkey(settings.HOTKEYS['CLOUD_ATK_BOOST'], cloud.toggle_atk_boost)
     # Aerith
-    keyboard.add_hotkey(settings.HOTKEYS['AERITH_GODMODE'], aerith.toggle_godmode)
-    keyboard.add_hotkey(settings.HOTKEYS['AERITH_INF_MP'], aerith.toggle_inf_mp)
-    keyboard.add_hotkey(settings.HOTKEYS['AERITH_INF_ATB'], aerith.toggle_inf_atb)
+    if settings.Appearance.ENABLE_INDIVIDUAL_CHARS:
+        keyboard.add_hotkey(settings.HOTKEYS['AERITH_GODMODE'], aerith.toggle_godmode)
+        keyboard.add_hotkey(settings.HOTKEYS['AERITH_INF_MP'], aerith.toggle_inf_mp)
+        keyboard.add_hotkey(settings.HOTKEYS['AERITH_INF_ATB'], aerith.toggle_inf_atb)
     # All characters
     keyboard.add_hotkey(settings.HOTKEYS['ALL_CHARS_GODMODE'], PartyMember.all_toggle_godmode)
     keyboard.add_hotkey(settings.HOTKEYS['ALL_CHARS_INF_MP'], PartyMember.all_toggle_inf_mp)
@@ -1455,6 +1570,9 @@ def main() -> None:
     keyboard.add_hotkey(settings.HOTKEYS['ALL_CHARS_INF_LIMIT'], PartyMember.all_toggle_inf_limit)
     keyboard.add_hotkey(settings.HOTKEYS['ALL_CHARS_ATK_BOOST'], PartyMember.all_toggle_atk_boost)
     keyboard.add_hotkey(settings.HOTKEYS['ALL_CHARS_LUCK_BOOST'], PartyMember.all_toggle_luck_boost)
+    # Meta
+    keyboard.add_hotkey(settings.HOTKEYS['HARDMODE_AP_MULTIPLIER'], you.toggle_hard_mode_ap_multiplier)
+    keyboard.add_hotkey(settings.HOTKEYS['HARDMODE_EXP_MULTIPLIER'], you.toggle_hard_mode_exp_multiplier)
     # Inventory
     keyboard.add_hotkey(settings.HOTKEYS['ADD_ITEM'], ct_gui.get_item_selection)
     # App control
